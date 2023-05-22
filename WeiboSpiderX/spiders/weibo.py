@@ -1,7 +1,6 @@
 import json
 import time
 from abc import ABC
-from typing import List
 from urllib.parse import urlencode
 
 import scrapy
@@ -12,11 +11,12 @@ from scrapy_redis.spiders import RedisSpider
 from WeiboSpiderX import constants
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
-from WeiboSpiderX.utils.tool import read_json_file
 
 # 获取项目设置参数
 settings = get_project_settings()
 SPIDER_BLOG_TYPE = settings.get('SPIDER_BLOG_TYPE')
+SPIDER_UID = settings.get('SPIDER_UID')
+SPIDER_GROUP = settings.get('SPIDER_GROUP')
 
 
 class WeiboAPI(object):
@@ -30,25 +30,6 @@ class WeiboAPI(object):
         self.user_friends_url = "https://weibo.com/ajax/friendships/friends"
         self.user_follow_content_url = "https://weibo.com/ajax/profile/followContent"
         self.cookie = None
-        system_config = read_json_file("./system-config.json")
-        self.original = system_config.get("original")
-        self.forward = system_config.get("forward")
-        self.filter_uids = []
-        # self.filter_uids = self.get_filter_user()
-
-    def get_filter_user(self):
-        original_users = [user.split("/")[-1] for user in self.original]
-        forward_users = [user.split("/")[-1] for user in self.forward]
-        if SPIDER_BLOG_TYPE == constants.BLOG_FILTER_ORIGINAL:
-            users = list(set(original_users))
-        elif SPIDER_BLOG_TYPE == constants.BLOG_FILTER_FORWARD:
-            users = list(set(forward_users))
-        else:
-            original_users.extend(forward_users)
-            users = list(set(original_users))
-        for user in users:
-            print("允许下载:{}".format(user))
-        return users
 
     def get_api(self):
         attributes = [
@@ -63,7 +44,7 @@ class WeiboAPI(object):
     def get_cookie(self):
         if self.cookie is None:
             # 添加cooke
-            cookie = get_redis().hget(constants.LOGIN_KEY, constants.SPIDER_UID)
+            cookie = get_redis().hget(constants.LOGIN_KEY, SPIDER_UID)
             self.cookie = json.loads(cookie)
             return self.cookie
         return self.cookie
@@ -100,7 +81,7 @@ class WeiboSpider(WeiboAPI, RedisSpider, ABC):
         if response.meta.get("url") == self.groups_url:
             # 第一次获取分组下的用户
             finder = JsonDataFinderFactory(response.text, mode="value")
-            group_items = finder.get_same_level(constants.SPIDER_GROUP)
+            group_items = finder.get_same_level(SPIDER_GROUP)
             params = {"list_id": group_items[0].get("idstr"), "page": 1}
 
             yield scrapy.Request(

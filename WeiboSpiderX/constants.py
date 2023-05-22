@@ -10,9 +10,6 @@
 @Desc:
 """
 
-SPIDER_UID = "7367188627"
-SPIDER_GROUP = "特别关注"
-
 LOGIN_KEY = "weibo:login"
 
 DOWNLOAD_PATH_IMG_FORWARD_STR = "img/转发微博图片"

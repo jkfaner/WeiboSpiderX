@@ -13,7 +13,7 @@ import datetime
 import json
 import os
 from typing import Union
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
 
 from WeiboSpiderX.items.base import BaseItem
 

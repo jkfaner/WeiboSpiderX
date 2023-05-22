@@ -115,30 +115,32 @@ REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
+# ===================Log========================
+# 日志
+LOG_ENABLED = True
+LOG_LEVEL = 'DEBUG'
+# LOG_FILE = 'scrapy.log'
+
+
+# ===================Redis========================
 # 启用Scrapy-Redis调度器
 SCHEDULER = "scrapy_redis.scheduler.Scheduler"
-
 # 启用Scrapy-Redis去重过滤器
 DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
-
 # 设置Redis作为Scrapy-Redis调度器和去重过滤器的存储
 REDIS_URL = 'redis://localhost:6379'
-
 # 启用分布式爬虫，允许多个爬虫实例共享相同的队列
 SCHEDULER_PERSIST = False
-
 # 可选：设置Redis的其他配置，如密码等
 REDIS_PARAMS = {
     'password': "",
 }
 
+# ===================Download========================
 FILES_STORE = '/Volumes/photo/weibo'  # 通用文件（包括图片和视频）的保存路径
 IMAGES_STORE = FILES_STORE
 DOWNLOAD_FAIL_ON_DATALOSS = False  # 文件过大警告
 
-SPIDER_BLOG_TYPE = "original"
-
-# 日志
-LOG_ENABLED = True
-LOG_LEVEL = 'DEBUG'
-# LOG_FILE = 'scrapy.log'
+SPIDER_BLOG_TYPE = "original"  # 爬取规则：original or forward
+SPIDER_UID = "7367188627"  # cookie的uid
+SPIDER_GROUP = "特别关注"  # 根据分组爬取
