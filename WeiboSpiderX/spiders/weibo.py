@@ -33,8 +33,8 @@ class WeiboAPI(object):
         system_config = read_json_file("./system-config.json")
         self.original = system_config.get("original")
         self.forward = system_config.get("forward")
-        # self.filter_uids = []
-        self.filter_uids = self.get_filter_user()
+        self.filter_uids = []
+        # self.filter_uids = self.get_filter_user()
 
     def get_filter_user(self):
         original_users = [user.split("/")[-1] for user in self.original]
@@ -72,6 +72,13 @@ class WeiboAPI(object):
 class WeiboSpider(WeiboAPI, RedisSpider, ABC):
     name = "weibo"
 
+    def start_requests(self):
+        """
+        爬虫入口
+        :return:
+        """
+        return self.get_groups()
+
     def get_groups(self):
         """
         获得分组
@@ -91,6 +98,7 @@ class WeiboSpider(WeiboAPI, RedisSpider, ABC):
         :return:
         """
         if response.meta.get("url") == self.groups_url:
+            # 第一次获取分组下的用户
             finder = JsonDataFinderFactory(response.text, mode="value")
             group_items = finder.get_same_level(constants.SPIDER_GROUP)
             params = {"list_id": group_items[0].get("idstr"), "page": 1}
@@ -102,9 +110,13 @@ class WeiboSpider(WeiboAPI, RedisSpider, ABC):
                 callback=self.get_group_members
             )
         else:
+            # 其他次数获取分组用户数据
             finder = JsonDataFinderFactory(response.text)
             users = finder.find_first_value("users")
             if users:
+                time.sleep(2)
+
+                # 获取用户
                 params = response.meta.get("params")
                 params["page"] = params["page"] + 1
                 yield scrapy.Request(
@@ -114,57 +126,15 @@ class WeiboSpider(WeiboAPI, RedisSpider, ABC):
                     callback=self.get_group_members
                 )
 
-
-    def get_follow_user(self):
-        # 获取用户关注
-        params = {"page": 1, "uid": constants.SPIDER_UID}
-        yield scrapy.Request(
-            url=f'{self.user_friends_url}?{urlencode(params)}',
-            cookies=self.get_cookie(),
-            meta={"url": self.user_friends_url, "params": params},
-            callback=self.get_user_follow
-        )
-
-    def start_requests(self):
-        """
-        爬虫入口
-        :return:
-        """
-        return self.get_follow_user()
-
-    def get_user_follow(self, response):
-        """
-        获取用户关注
-        :param response:
-        :return:
-        """
-        finder = JsonDataFinderFactory(response.text)
-        if finder.exist_key("users"):
-            for uid in finder.find_all_values("idstr"):
-                if uid in self.filter_uids:
-                    yield {'user': response.text}
-
-                    time.sleep(2)
-
-                    # 获取用户
-                    query = response.meta["params"]
-                    params = {"page": query["page"] + 1, "uid": query["uid"]}
+                # 获取博客
+                for user in extractor_user(response.text):
+                    params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
                     yield scrapy.Request(
-                        url=f'{self.user_friends_url}?{urlencode(params)}',
+                        url=f'{self.user_blog_url}?{urlencode(params)}',
                         cookies=self.get_cookie(),
-                        meta={"url": self.user_friends_url, "params": params},
-                        callback=self.get_user_follow
+                        meta={"url": self.user_blog_url, "params": params},
+                        callback=self.get_blogs
                     )
-
-                    # 获取博客
-                    for user in extractor_user(response.text):
-                        params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
-                        yield scrapy.Request(
-                            url=f'{self.user_blog_url}?{urlencode(params)}',
-                            cookies=self.get_cookie(),
-                            meta={"url": self.user_blog_url, "params": params},
-                            callback=self.get_blogs
-                        )
 
     def get_blogs(self, response):
         """
