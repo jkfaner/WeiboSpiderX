@@ -1,9 +1,12 @@
 import json
+import logging
+import sys
 import time
 from abc import ABC
 from urllib.parse import urlencode
 
 import scrapy
+from DecryptLogin.core import weibo
 from scrapy.utils.project import get_project_settings
 from scrapy_redis import get_redis
 from scrapy_redis.spiders import RedisSpider
@@ -33,10 +36,8 @@ class WeiboAPI(object):
 
     def get_api(self):
         attributes = [
-            self.user_blog_url,
-            self.user_info_url,
-            self.user_info_detail_url,
-            self.user_friends_url,
+            self.user_blog_url, self.user_info_url,
+            self.user_info_detail_url, self.user_friends_url,
             self.user_follow_content_url
         ]
         return attributes
@@ -52,6 +53,12 @@ class WeiboAPI(object):
 
 class WeiboSpider(WeiboAPI, RedisSpider, ABC):
     name = "weibo"
+
+    def login(self):
+        result, session = weibo().login()
+        uid = result["uid"]
+        if uid != SPIDER_UID:
+            sys.exit("当前登录用户与设置用户不一致！")
 
     def start_requests(self):
         """

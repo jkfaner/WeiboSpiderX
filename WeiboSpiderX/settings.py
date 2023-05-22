@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = "WeiboSpiderX.spiders"  # 新建爬虫模块路径
 
 ROBOTSTXT_OBEY = False  # 是否遵循 robots.txt 规则
 
-CONCURRENT_REQUESTS = 2  # 并发请求的最大数量
+CONCURRENT_REQUESTS = 3  # 并发请求的最大数量
 
 # 下载延迟设置，单位为秒
 # DOWNLOAD_DELAY = 3
@@ -24,7 +24,7 @@ CONCURRENT_REQUESTS = 2  # 并发请求的最大数量
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
 
-COOKIES_ENABLED = True  # 是否启用 cookies
+# COOKIES_ENABLED = True  # 是否启用 cookies
 
 # Disable Telnet Console (enabled by default)
 # 是否启用 Telnet 控制台
@@ -34,12 +34,12 @@ COOKIES_ENABLED = True  # 是否启用 cookies
 
 # Override the default request headers:
 # DEFAULT_REQUEST_HEADERS = {
-#    "Accept": "application/json, text/plain, */*",
-#    "Accept-Language": "zh",
+#     "Accept": "application/json, text/plain, */*",
+#     "Accept-Language": "zh",
 # }
 
 SPIDER_MIDDLEWARES = {
-    "WeiboSpiderX.middlewares.FilterUserMiddleware": 1,
+    "WeiboSpiderX.middlewares.LoginMiddleware": 1,
     "WeiboSpiderX.middlewares.TooManyRequestsRetryMiddleware": 300,
 }
 
