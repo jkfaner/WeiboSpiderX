@@ -138,11 +138,12 @@ class WeiboSpider(WeiboAPI, RedisSpider, ABC):
 
             # 获取博客
             since_id = finder.get_first_value("since_id")
-            query = response.meta["params"]
-            params = {"uid": query["uid"], "page": query["page"] + 1, "since_id": since_id, "feature": 0}
-            yield scrapy.Request(
-                url=f'{self.user_blog_url}?{urlencode(params)}',
-                cookies=self.get_cookie(),
-                meta={"url": self.user_blog_url, "params": params},
-                callback=self.get_blogs
-            )
+            if since_id:
+                query = response.meta["params"]
+                params = {"uid": query["uid"], "page": query["page"] + 1, "since_id": since_id, "feature": 0}
+                yield scrapy.Request(
+                    url=f'{self.user_blog_url}?{urlencode(params)}',
+                    cookies=self.get_cookie(),
+                    meta={"url": self.user_blog_url, "params": params},
+                    callback=self.get_blogs
+                )

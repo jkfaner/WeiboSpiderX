@@ -119,7 +119,7 @@ FEED_EXPORT_ENCODING = "utf-8"
 # 日志
 LOG_ENABLED = True
 LOG_LEVEL = 'DEBUG'
-# LOG_FILE = 'scrapy.log'
+LOG_FILE = 'scrapy.log'
 
 
 # ===================Redis========================
