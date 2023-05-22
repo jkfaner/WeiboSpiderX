@@ -47,19 +47,6 @@ def set_attr(source: dict, entity: BaseItem):
     return entity
 
 
-def parse_query_params(url):
-    # 解析 URL
-    parsed_url = urlparse(url)
-
-    # 获取查询参数部分，并将其解析为字典形式
-    query_params = parse_qs(parsed_url.query)
-
-    # 将多值参数字典转换为单值参数字典
-    params_dict = {k: v[0] for k, v in query_params.items()}
-
-    return params_dict
-
-
 def get_file_suffix(url):
     """
     通过url确定文件后缀

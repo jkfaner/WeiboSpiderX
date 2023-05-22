@@ -15,8 +15,9 @@ from scrapy.utils.project import get_project_settings
 
 from WeiboSpiderX.extractor.wb_extractor import extractor_user, ExtractorBlog, extract_media
 from WeiboSpiderX.filter import filter_type
-from WeiboSpiderX.items.media import Media
 from WeiboSpiderX.items.blogType import BlogType
+from WeiboSpiderX.items.media import Media
+
 # 获取项目设置参数
 settings = get_project_settings()
 FILES_STORE = settings.get('FILES_STORE')

@@ -9,7 +9,7 @@
 @File:filter.py
 @Desc:
 """
-from typing import List, Union
+from typing import List
 
 from scrapy.utils.project import get_project_settings
 

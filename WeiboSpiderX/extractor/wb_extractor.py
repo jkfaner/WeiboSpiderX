@@ -13,9 +13,9 @@ from typing import List
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
-from WeiboSpiderX.items.media import Media
 from WeiboSpiderX.items.blog import Blog
 from WeiboSpiderX.items.blogType import BlogType
+from WeiboSpiderX.items.media import Media
 from WeiboSpiderX.items.user import UserItem
 from WeiboSpiderX.items.video import Video
 from WeiboSpiderX.utils.tool import set_attr, time_formatting, get_file_suffix

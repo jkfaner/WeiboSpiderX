@@ -11,6 +11,7 @@
 """
 
 SPIDER_UID = "7367188627"
+SPIDER_GROUP = "特别关注"
 
 LOGIN_KEY = "weibo:login"
 

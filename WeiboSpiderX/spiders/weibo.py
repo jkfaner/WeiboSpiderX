@@ -1,19 +1,18 @@
 import json
-import logging
 import time
 from abc import ABC
 from typing import List
 from urllib.parse import urlencode
 
 import scrapy
+from scrapy.utils.project import get_project_settings
 from scrapy_redis import get_redis
 from scrapy_redis.spiders import RedisSpider
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
-from WeiboSpiderX.utils.tool import parse_query_params, read_json_file
-from scrapy.utils.project import get_project_settings
+from WeiboSpiderX.utils.tool import read_json_file
 
 # 获取项目设置参数
 settings = get_project_settings()
@@ -23,24 +22,23 @@ SPIDER_BLOG_TYPE = settings.get('SPIDER_BLOG_TYPE')
 class WeiboAPI(object):
 
     def __init__(self):
+        self.groups_url = "https://weibo.com/ajax/profile/getGroups"
+        self.group_members_url = "https://weibo.com/ajax/profile/getGroupMembers"
         self.user_blog_url = "https://weibo.com/ajax/statuses/mymblog"
         self.user_info_url = "https://weibo.com/ajax/profile/info"
         self.user_info_detail_url = "https://weibo.com/ajax/profile/detail"
         self.user_friends_url = "https://weibo.com/ajax/friendships/friends"
         self.user_follow_content_url = "https://weibo.com/ajax/profile/followContent"
         self.cookie = None
-        system_config = read_json_file("./src/resource/system-config.json")
+        system_config = read_json_file("./system-config.json")
         self.original = system_config.get("original")
         self.forward = system_config.get("forward")
+        # self.filter_uids = []
         self.filter_uids = self.get_filter_user()
 
-    @staticmethod
-    def parse_user(users: List) -> List:
-        return [user.split("/")[-1] for user in users]
-
     def get_filter_user(self):
-        original_users = self.parse_user(self.original)
-        forward_users = self.parse_user(self.forward)
+        original_users = [user.split("/")[-1] for user in self.original]
+        forward_users = [user.split("/")[-1] for user in self.forward]
         if SPIDER_BLOG_TYPE == constants.BLOG_FILTER_ORIGINAL:
             users = list(set(original_users))
         elif SPIDER_BLOG_TYPE == constants.BLOG_FILTER_FORWARD:
@@ -74,15 +72,65 @@ class WeiboAPI(object):
 class WeiboSpider(WeiboAPI, RedisSpider, ABC):
     name = "weibo"
 
+    def get_groups(self):
+        """
+        获得分组
+        :return:
+        """
+        params = {"showBilateral": 1}
+        yield scrapy.Request(
+            url=f'{self.groups_url}?{urlencode(params)}',
+            cookies=self.get_cookie(),
+            meta={"url": self.groups_url, "params": params},
+            callback=self.get_group_members
+        )
+
+    def get_group_members(self, response):
+        """
+        获得分组数据
+        :return:
+        """
+        if response.meta.get("url") == self.groups_url:
+            finder = JsonDataFinderFactory(response.text, mode="value")
+            group_items = finder.get_same_level(constants.SPIDER_GROUP)
+            params = {"list_id": group_items[0].get("idstr"), "page": 1}
+
+            yield scrapy.Request(
+                url=f'{self.group_members_url}?{urlencode(params)}',
+                cookies=self.get_cookie(),
+                meta={"url": self.group_members_url, "params": params},
+                callback=self.get_group_members
+            )
+        else:
+            finder = JsonDataFinderFactory(response.text)
+            users = finder.find_first_value("users")
+            if users:
+                params = response.meta.get("params")
+                params["page"] = params["page"] + 1
+                yield scrapy.Request(
+                    url=f'{self.group_members_url}?{urlencode(params)}',
+                    cookies=self.get_cookie(),
+                    meta={"url": self.group_members_url, "params": params},
+                    callback=self.get_group_members
+                )
+
+
+    def get_follow_user(self):
+        # 获取用户关注
+        params = {"page": 1, "uid": constants.SPIDER_UID}
+        yield scrapy.Request(
+            url=f'{self.user_friends_url}?{urlencode(params)}',
+            cookies=self.get_cookie(),
+            meta={"url": self.user_friends_url, "params": params},
+            callback=self.get_user_follow
+        )
+
     def start_requests(self):
         """
         爬虫入口
         :return:
         """
-        # 获取用户关注
-        params = dict(page=1, uid=constants.SPIDER_UID)
-        url = f'{self.user_friends_url}?{urlencode(params)}'
-        yield scrapy.Request(url=url, cookies=self.get_cookie(), callback=self.get_user_follow)
+        return self.get_follow_user()
 
     def get_user_follow(self, response):
         """
@@ -95,18 +143,28 @@ class WeiboSpider(WeiboAPI, RedisSpider, ABC):
             for uid in finder.find_all_values("idstr"):
                 if uid in self.filter_uids:
                     yield {'user': response.text}
+
                     time.sleep(2)
+
                     # 获取用户
-                    params = parse_query_params(response.url)
-                    params = dict(page=int(params['page']) + 1, uid=params['uid'])
-                    url = f'{self.user_friends_url}?{urlencode(params)}'
-                    yield scrapy.Request(url=url, cookies=self.get_cookie(), callback=self.get_user_follow)
+                    query = response.meta["params"]
+                    params = {"page": query["page"] + 1, "uid": query["uid"]}
+                    yield scrapy.Request(
+                        url=f'{self.user_friends_url}?{urlencode(params)}',
+                        cookies=self.get_cookie(),
+                        meta={"url": self.user_friends_url, "params": params},
+                        callback=self.get_user_follow
+                    )
 
                     # 获取博客
                     for user in extractor_user(response.text):
-                        params = dict(uid=user.idstr, page=1, since_id="", feature=0)
-                        url = f'{self.user_blog_url}?{urlencode(params)}'
-                        yield scrapy.Request(url=url, cookies=self.get_cookie(), callback=self.get_blogs)
+                        params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
+                        yield scrapy.Request(
+                            url=f'{self.user_blog_url}?{urlencode(params)}',
+                            cookies=self.get_cookie(),
+                            meta={"url": self.user_blog_url, "params": params},
+                            callback=self.get_blogs
+                        )
 
     def get_blogs(self, response):
         """
@@ -117,10 +175,16 @@ class WeiboSpider(WeiboAPI, RedisSpider, ABC):
         finder = JsonDataFinderFactory(response.text)
         if finder.exist_key("list"):
             yield dict(blog=response.text)
+
             time.sleep(2)
+
             # 获取博客
             since_id = finder.get_first_value("since_id")
-            params = parse_query_params(response.url)
-            params = dict(uid=params['uid'], page=int(params['page']) + 1, since_id=since_id, feature=0)
-            url = f'{self.user_blog_url}?{urlencode(params)}'
-            yield scrapy.Request(url=url, cookies=self.get_cookie(), callback=self.get_blogs)
+            query = response.meta["params"]
+            params = {"uid": query["uid"], "page": query["page"] + 1, "since_id": since_id, "feature": 0}
+            yield scrapy.Request(
+                url=f'{self.user_blog_url}?{urlencode(params)}',
+                cookies=self.get_cookie(),
+                meta={"url": self.user_blog_url, "params": params},
+                callback=self.get_blogs
+            )
