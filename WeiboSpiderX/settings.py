@@ -24,7 +24,9 @@ CONCURRENT_REQUESTS = 3  # 并发请求的最大数量
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
 
-# COOKIES_ENABLED = True  # 是否启用 cookies
+# 是否启用 cookies
+# 开启后使用自定义cookie
+# COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
 # 是否启用 Telnet 控制台
@@ -35,19 +37,20 @@ CONCURRENT_REQUESTS = 3  # 并发请求的最大数量
 # Override the default request headers:
 # DEFAULT_REQUEST_HEADERS = {
 #     "Accept": "application/json, text/plain, */*",
-#     "Accept-Language": "zh",
+#     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,da;q=0.7,zh-TW;q=0.6",
 # }
 
-SPIDER_MIDDLEWARES = {
-    "WeiboSpiderX.middlewares.LoginMiddleware": 1,
-    "WeiboSpiderX.middlewares.TooManyRequestsRetryMiddleware": 300,
-}
+# SPIDER_MIDDLEWARES = {
+#     "WeiboSpiderX.middlewares.RefreshCookieMiddleware": 299,
+#     "WeiboSpiderX.middlewares.TooManyRequestsRetryMiddleware": 300,
+# }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    "WeiboSpiderX.middlewares.DownloaderMiddleware": 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "WeiboSpiderX.middlewares.RefreshCookieMiddleware": 299,
+    "WeiboSpiderX.middlewares.TooManyRequestsRetryMiddleware": 300,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -119,7 +122,7 @@ FEED_EXPORT_ENCODING = "utf-8"
 # 日志
 LOG_ENABLED = True
 LOG_LEVEL = 'DEBUG'
-LOG_FILE = 'scrapy.log'
+# LOG_FILE = 'scrapy.log'
 
 
 # ===================Redis========================

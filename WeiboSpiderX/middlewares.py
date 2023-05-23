@@ -28,20 +28,22 @@ class TooManyRequestsRetryMiddleware(RetryMiddleware):
         return response
 
 
-class LoginMiddleware:
+class RefreshCookieMiddleware:
+
+    def __init__(self, crawler):
+        self.crawler = crawler
 
     @classmethod
     def from_crawler(cls, crawler):
-        s = cls()
+        s = cls(crawler)
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
 
     def spider_opened(self, spider):
-        spider.logger.info("Spider opened: %s" % spider.name)
+        spider.logger.info('Spider opened: %s' % spider.name)
 
     def process_request(self, request, spider):
-        print(request)
-        return request
-
-    def process_response(self, request, response, spider):
-        return response
+        pass
+        # if request.meta.get("url") not in spider.api_list:
+        #     return request
+        # return request
