@@ -197,10 +197,10 @@ class ExtractorBlog:
 def extract_media(blogs: List[Blog]) -> List[Media]:
     medias = []
     for blog in blogs:
-        base_filename = f"{time_formatting(blog.created_at)}_{blog.blog_id}"
 
         # 视频
         if blog.videos:
+            base_filename = f"{time_formatting(blog.created_at)}_{blog.blog_id}"
             filename = f"{base_filename}.mp4"
 
             video_media = Media()
@@ -218,6 +218,7 @@ def extract_media(blogs: List[Blog]) -> List[Media]:
         # 图片
         for index, image in enumerate(blog.images):
             suffix = get_file_suffix(image["url"])
+            base_filename = f"{time_formatting(blog.created_at)}_{blog.blog_id}"
             filename = f"{base_filename}_{index}.{suffix}"
 
             image_media = Media()
@@ -235,6 +236,7 @@ def extract_media(blogs: List[Blog]) -> List[Media]:
         # livephoto
         for index, livephoto in enumerate(blog.livephoto_video):
             suffix = get_file_suffix(livephoto["url"])
+            base_filename = f"{time_formatting(blog.created_at)}_{blog.blog_id}"
             filename = f"{base_filename}_{index}.{suffix}"
 
             live_media = Media()

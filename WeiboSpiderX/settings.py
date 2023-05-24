@@ -48,7 +48,6 @@ CONCURRENT_REQUESTS = 3  # 并发请求的最大数量
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    "WeiboSpiderX.middlewares.RefreshCookieMiddleware": 299,
     "WeiboSpiderX.middlewares.TooManyRequestsRetryMiddleware": 300,
 }
 
@@ -61,10 +60,10 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "WeiboSpiderX.pipelines.UserPipeline": 299,
-    "WeiboSpiderX.pipelines.BlogPipeline": 300,
-    "WeiboSpiderX.pipelines.CustomImagesPipeline": 301,
-    "WeiboSpiderX.pipelines.VideoDownloadPipeline": 302,
+    "WeiboSpiderX.pipelines.user.UserPipeline": 299,
+    "WeiboSpiderX.pipelines.blog.BlogPipeline": 300,
+    "WeiboSpiderX.pipelines.image.CustomImagesPipeline": 301,
+    "WeiboSpiderX.pipelines.video.VideoDownloadPipeline": 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

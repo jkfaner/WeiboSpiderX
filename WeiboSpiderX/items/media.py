@@ -12,6 +12,7 @@
 import json
 
 from WeiboSpiderX.items.base import BaseItem
+from WeiboSpiderX.items.video import Video
 
 
 class Media(BaseItem):
@@ -110,5 +111,8 @@ class Media(BaseItem):
 
     def to_json(self):
         media_dict = self.to_dict()
-        media_dict["blog"] = media_dict["blog"].to_dict()
+        blog = media_dict["blog"]
+        if isinstance(blog.videos, Video):
+            blog.videos = blog.videos.to_dict()
+        media_dict["blog"] = blog.to_dict()
         return json.dumps(media_dict, ensure_ascii=False)

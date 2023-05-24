@@ -12,6 +12,7 @@ from scrapy_redis.spiders import RedisSpider
 from WeiboSpiderX import constants
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
+from WeiboSpiderX.items.item import RequestMeta, RequestParam
 
 
 class WeiboSpider(RedisSpider, ABC):
@@ -27,10 +28,6 @@ class WeiboSpider(RedisSpider, ABC):
         self.user_friends_url = "https://weibo.com/ajax/friendships/friends"
         self.user_follow_content_url = "https://weibo.com/ajax/profile/followContent"
         self.api_list = self.get_api()
-        self.header = {
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,da;q=0.7,zh-TW;q=0.6",
-        }
         self.settings = kwargs.get('settings')
         self.uid = None
 
@@ -42,11 +39,11 @@ class WeiboSpider(RedisSpider, ABC):
         ]
         return attributes
 
-    # @classmethod
-    # def from_crawler(cls, crawler, *args, **kwargs):
-    #     spider = super(WeiboSpider, cls).from_crawler(crawler, *args, **kwargs)
-    #     spider.settings = crawler.settings
-    #     return spider
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(WeiboSpider, cls).from_crawler(crawler, *args, **kwargs)
+        spider.settings = crawler.settings
+        return spider
 
     def parse_login(self, response):
         """
@@ -73,7 +70,7 @@ class WeiboSpider(RedisSpider, ABC):
         self.server.hset(constants.LOGIN_KEY, self.uid, json.dumps(cookie))
         return cookie
 
-    def request(self, raw_url, params, callback):
+    def request(self, raw_url, params, callback) -> RequestParam:
         """
         获取request
         :param raw_url: 不带任何参数的url
@@ -82,15 +79,17 @@ class WeiboSpider(RedisSpider, ABC):
         :return:
         """
         url = f'{raw_url}?{urlencode(params)}'
-        meta = {
-            "url": url,
-            "raw_url": raw_url,
-            "params": params,
-            "callback": callback
-        }
-        cookies = self.get_cookie()
-        request = scrapy.Request(url=url, cookies=cookies, meta=meta, callback=callback)
-        return request
+        meta = RequestMeta()
+        meta.url = url
+        meta.raw_url = raw_url
+        meta.params = params
+
+        p = RequestParam()
+        p.url = url
+        p.meta = meta.to_dict()
+        p.callback = callback
+        p.cookies = self.get_cookie()
+        return p
 
     def start_requests(self):
         """
@@ -104,20 +103,10 @@ class WeiboSpider(RedisSpider, ABC):
         获得分组
         :return:
         """
+        self.logger.info("获取分组...")
         params = {"showBilateral": 1}
-        # yield self.request(raw_url=self.groups_url, params=params, callback=self.process_group_members)
-        raw_url = self.groups_url
-        callback = self.process_group_members
-        url = f'{raw_url}?{urlencode(params)}'
-        meta = {
-            "url": url,
-            "raw_url": raw_url,
-            "params": params,
-            "callback": callback
-        }
-        cookies = self.get_cookie()
-        request = scrapy.Request(url=url, cookies=cookies, meta=meta, callback=callback)
-        yield request
+        item = self.request(self.groups_url, params, self.process_group_members)
+        yield scrapy.Request(url=item.url, cookies=item.cookies, meta=item.meta, callback=item.callback)
 
     def process_group_members(self, response):
         """
@@ -126,29 +115,36 @@ class WeiboSpider(RedisSpider, ABC):
         """
         self.parse_login(response)
 
-        if response.meta.get("url") == self.groups_url:
-            # 第一次获取分组下的用户
+        if response.meta.get("raw_url") == self.groups_url:
+            self.logger.info("第一次获取分组下的博主...")
             finder = JsonDataFinderFactory(response.text, mode="value")
             group_items = finder.get_same_level(self.settings.get("SPIDER_GROUP"))
             params = {"list_id": group_items[0].get("idstr"), "page": 1}
-            yield self.request(self.group_members_url, params, self.process_group_members)
+            item = self.request(self.group_members_url, params, self.process_group_members)
+            yield scrapy.Request(url=item.url, cookies=item.cookies, meta=item.meta, callback=item.callback)
 
-        else:
-            # 其他次数获取分组用户数据
+        elif response.meta.get("raw_url") == self.group_members_url:
+            self.logger.info("获取分组下其他的博主...")
             finder = JsonDataFinderFactory(response.text)
             users = finder.find_first_value("users")
             if users:
+                yield {"user": response.text}
+
                 time.sleep(2)
 
                 # 获取用户
+                self.logger.info("获取博主...")
                 params = response.meta.get("params")
                 params["page"] = params["page"] + 1
-                yield self.request(self.group_members_url, params, self.process_group_members)
+                item = self.request(self.group_members_url, params, self.process_group_members)
+                yield scrapy.Request(url=item.url, cookies=item.cookies, meta=item.meta, callback=item.callback)
 
                 # 获取博客
+                self.logger.info("获取博客...")
                 for user in extractor_user(response.text):
                     params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
-                    yield self.request(self.user_blog_url, params, self.process_blogs)
+                    item = self.request(self.user_blog_url, params, self.process_blogs)
+                    yield scrapy.Request(url=item.url, cookies=item.cookies, meta=item.meta, callback=item.callback)
 
     def process_blogs(self, response):
         """
@@ -165,8 +161,10 @@ class WeiboSpider(RedisSpider, ABC):
             time.sleep(2)
 
             # 获取博客
+            self.logger.info("获取博客...")
             since_id = finder.get_first_value("since_id")
             if since_id:
                 query = response.meta["params"]
                 params = {"uid": query["uid"], "page": query["page"] + 1, "since_id": since_id, "feature": 0}
-                yield self.request(self.user_blog_url, params, self.process_blogs)
+                item = self.request(self.user_blog_url, params, self.process_blogs)
+                yield scrapy.Request(url=item.url, cookies=item.cookies, meta=item.meta, callback=item.callback)
