@@ -34,10 +34,11 @@ class VideoDownloadPipeline(FilesPipeline):
 
     def get_media_requests(self, item, info):
         # 获取视频URL并生成下载请求
-        for media in item:
-            if isinstance(media, Media):
-                if media.is_video or media.is_live:
-                    yield scrapy.Request(media.url, meta=dict(media=media))
+        if isinstance(item, list):
+            for media in item:
+                if isinstance(media, Media):
+                    if media.is_video or media.is_live:
+                        yield scrapy.Request(media.url, meta=dict(media=media))
 
     def item_completed(self, results, item, info):
         completed_list = [x for ok, x in results if ok]

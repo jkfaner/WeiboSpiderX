@@ -66,22 +66,11 @@ def get_file_suffix(url):
     return suffix
 
 
-def time_formatting(created_at, usefilename=True, strftime=None):
+def time_formatting(created_at):
     """
     时间格式化
     :param created_at: 'Fri Dec 24 03:49:03 +0800 2021'
-    :param usefilename: 启用文件名格式：20211224
-    :param strftime: 含有时分秒格式 2021-12-24 3:49:03
     :return: 格式化后的时间字符串
     """
     dt_obj = datetime.datetime.strptime(created_at, '%a %b %d %H:%M:%S %z %Y')
-
-    if usefilename:
-        strftime = '%Y%m%d'
-    elif strftime:
-        strftime = '%Y-%m-%d %H:%M:%S'
-    else:
-        strftime = '%Y-%m-%d'
-
-    return dt_obj.strftime(strftime)
-
+    return dt_obj.strftime("%Y%m%d")

@@ -130,7 +130,7 @@ class WeiboSpider(RedisSpider, ABC):
             if users:
                 yield {"user": response.text}
 
-                time.sleep(2)
+                time.sleep(1)
 
                 # 获取用户
                 self.logger.info("获取博主...")
@@ -158,7 +158,7 @@ class WeiboSpider(RedisSpider, ABC):
         if finder.exist_key("list"):
             yield dict(blog=response.text)
 
-            time.sleep(2)
+            time.sleep(1)
 
             # 获取博客
             self.logger.info("获取博客...")

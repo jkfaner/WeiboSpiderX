@@ -9,6 +9,7 @@
 @File:wb_extractor.py
 @Desc:
 """
+import sys
 from typing import List
 
 from WeiboSpiderX import constants
@@ -32,7 +33,12 @@ def extractor_user(json_str) -> List[UserItem]:
     user = user if user else finder.find_first_value('user')
     if isinstance(user, list):
         for _user in user:
-            users.append(set_attr(source=_user, entity=UserItem()))
+            if isinstance(_user,dict):
+                users.append(set_attr(source=_user, entity=UserItem()))
+            else:
+                print(json_str)
+                print(user)
+                sys.exit("extractor_user")
     elif isinstance(user, dict):
         users.append(set_attr(source=user, entity=UserItem()))
     else:

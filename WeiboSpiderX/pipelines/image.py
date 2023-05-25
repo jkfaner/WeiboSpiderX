@@ -33,10 +33,11 @@ class CustomImagesPipeline(ImagesPipeline):
 
     def get_media_requests(self, item, info):
         # 在这里生成下载图片的请求
-        for media in item:
-            if isinstance(media, Media):
-                if media.is_image:
-                    yield scrapy.Request(media.url, meta=dict(media=media))
+        if isinstance(item, list):
+            for media in item:
+                if isinstance(media, Media):
+                    if media.is_image:
+                        yield scrapy.Request(media.url, meta=dict(media=media))
 
     def item_completed(self, results, item, info):
         completed_list = [x for ok, x in results if ok]

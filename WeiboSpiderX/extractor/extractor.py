@@ -12,8 +12,6 @@
 import json
 from typing import Any, List, Union, Optional
 
-from WeiboSpiderX.utils.tool import read_json_file
-
 
 class JsonPathFinder:
     """用于查找 JSON 数据的路径"""
@@ -288,11 +286,3 @@ class JsonDataFinderFactory(JsonDataFinder):
             return value
         else:
             return []
-
-
-if __name__ == '__main__':
-    j = read_json_file("/Users/llb/PycharmProjects/Spider/WeiboSpiderX/groups.json")
-    # finder = JsonDataFinderFactory(j, mode="value")
-    finder = JsonDataFinderFactory(j, mode="key")
-    path = finder.get_same_level("name")
-    print(path)
