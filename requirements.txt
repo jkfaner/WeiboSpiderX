@@ -1,0 +1,5 @@
+DecryptLogin==0.2.7
+DecryptLogin==0.3.9
+Requests==2.31.0
+Scrapy==2.9.0
+scrapy_redis==0.7.3
