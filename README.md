@@ -29,7 +29,21 @@
 
 2. 依赖安装
 3. 可直接执行run.py
-
+#### 部署
+- Gerapy客户端
+```angular2html
+pip install gerapy
+gerapy init
+cd gerapy
+gerapy migrate
+gerapy createsuperuser
+gerapy runserver
+```
+- 服务端
+```angular2html
+pip install scrapyd
+scrapyd
+```
 ### 参考
 
 - 部分脚本代码由chatGPT生成

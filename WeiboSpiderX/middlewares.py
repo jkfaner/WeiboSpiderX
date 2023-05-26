@@ -56,12 +56,13 @@ class HandleCookieMiddleware:
             return json.loads(cookie)
 
     def login(self):
-        result, session = weibo().login()
-        uid = result["uid"]
-        if uid != self.uid:
-            sys.exit("当前登录用户与设置用户不一致！")
-        cookie = dict_from_cookiejar(session.cookies)
-        self.redis.hset(constants.LOGIN_KEY, self.uid, json.dumps(cookie))
+        if not self.get_cookies():
+            result, session = weibo().login()
+            uid = result["uid"]
+            if uid != self.uid:
+                sys.exit("当前登录用户与设置用户不一致！")
+            cookie = dict_from_cookiejar(session.cookies)
+            self.redis.hset(constants.LOGIN_KEY, self.uid, json.dumps(cookie))
 
     def process_response(self, request, response, spider):
         # 检查响应是否表示登录失败

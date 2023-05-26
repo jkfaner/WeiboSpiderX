@@ -13,8 +13,8 @@ from WeiboSpiderX.items.item import RequestMeta, RequestParam
 class WeiboSpider(RedisSpider, ABC):
     name = "weibo"
 
-    def __init__(self, *args, **kwargs):
-        super(WeiboSpider).__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super(WeiboSpider).__init__()
         self.groups_url = "https://weibo.com/ajax/profile/getGroups"
         self.group_members_url = "https://weibo.com/ajax/profile/getGroupMembers"
         self.user_blog_url = "https://weibo.com/ajax/statuses/mymblog"
@@ -75,7 +75,7 @@ class WeiboSpider(RedisSpider, ABC):
         self.logger.info("获取分组...")
         params = {"showBilateral": 1}
         item = self.request(self.groups_url, params, self.process_group_members)
-        yield scrapy.Request(url=item.url,  meta=item.meta, callback=item.callback)
+        yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
 
     def process_group_members(self, response):
         """
