@@ -184,8 +184,8 @@ class ExtractorBlog:
                 pic["thumbnail"].update(dict(index=index))
                 large_images.append(pic["thumbnail"])
 
-            if pic.get("Video"):
-                videos.append(dict(url=pic["Video"], index=index))
+            if pic.get("video"):
+                videos.append(dict(url=pic["video"], index=index))
 
         return large_images, videos
 
