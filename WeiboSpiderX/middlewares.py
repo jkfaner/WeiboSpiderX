@@ -39,7 +39,6 @@ class HandleCookieMiddleware:
         self.uid = uid
         self.redis = redis
         self.api_list = apis
-        self.logged_in = False  # 标志变量，表示是否已登录成功
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -57,14 +56,12 @@ class HandleCookieMiddleware:
             return json.loads(cookie)
 
     def login(self):
-        if not self.logged_in:
-            result, session = weibo().login()
-            uid = result["uid"]
-            if uid != self.uid:
-                sys.exit("当前登录用户与设置用户不一致！")
-            cookie = dict_from_cookiejar(session.cookies)
-            self.redis.hset(constants.LOGIN_KEY, self.uid, json.dumps(cookie))
-            self.logged_in = True
+        result, session = weibo().login()
+        uid = result["uid"]
+        if uid != self.uid:
+            sys.exit("当前登录用户与设置用户不一致！")
+        cookie = dict_from_cookiejar(session.cookies)
+        self.redis.hset(constants.LOGIN_KEY, self.uid, json.dumps(cookie))
 
     def process_response(self, request, response, spider):
         # 检查响应是否表示登录失败
@@ -90,15 +87,13 @@ class HandleCookieMiddleware:
     def should_login(self, request):
         # 根据请求的URL、响应内容等判断是否需要登录
         # 返回True表示需要登录，False表示无需登录
-        if request.url.split("?")[0] not in self.api_list and not self.logged_in:
-            self.logged_in = False
+        if request.url.split("?")[0] not in self.api_list:
             return True
         return False
 
     def is_login_failed(self, response):
         # 根据响应内容、状态码等判断是否登录失败
         # 返回True表示登录失败，False表示登录成功
-        if response.url.split("?")[0] not in self.api_list and not self.logged_in:
-            self.logged_in = False
+        if response.url.split("?")[0] not in self.api_list:
             return True
         return False

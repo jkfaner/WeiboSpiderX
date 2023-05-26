@@ -23,6 +23,7 @@ class BlogPipeline:
     def __init__(self, settings, server):
         self.settings = settings
         self.server = server
+        self.redis_name = constants.MEDIA_KEY
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -45,6 +46,7 @@ class BlogPipeline:
             blogs = ext.extractor_blog(item["blog"])
             medias = self.filter_blog_type(blogs)
             for media in medias:
-                self.server.hset(constants.MEDIA_KEY, media.blog_id, media.to_json())
+                if not self.server.hexists(self.redis_name, media.blog_id):
+                    self.server.hset(self.redis_name, media.blog_id, media.to_json())
             return medias
         return item
