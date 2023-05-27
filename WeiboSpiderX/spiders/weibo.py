@@ -108,11 +108,8 @@ class WeiboSpider(RedisSpider, ABC):
                 yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
 
                 # 获取博客
-                self.logger.info("获取博客...")
                 for user in extractor_user(response.text):
                     self.logger.info("获取博客：{}".format(user.screen_name))
-                    if "7492267558" not in user.idstr:
-                        continue
                     params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
                     item = self.request(self.user_blog_url, params, self.process_blogs)
                     yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
