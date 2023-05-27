@@ -65,7 +65,10 @@ class HandleCookieMiddleware:
 
     def process_request(self, request, spider):
         # 在请求中添加Cookie
-        request.cookies = self.get_cookies()
+        if request.meta.get("url"):
+            request.cookies = self.get_cookies()
+        # else:
+        #     request.headers = {"Accept": "*/*"}
 
     @staticmethod
     def cookie_failed(request, response):

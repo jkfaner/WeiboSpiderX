@@ -12,7 +12,7 @@ BOT_NAME = "WeiboSpiderX"  # 项目名称
 SPIDER_MODULES = ["WeiboSpiderX.spiders"]  # 爬虫模块路径
 NEWSPIDER_MODULE = "WeiboSpiderX.spiders"  # 新建爬虫模块路径
 
-USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
+# USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
 
 ROBOTSTXT_OBEY = False  # 是否遵循 robots.txt 规则
 
@@ -146,5 +146,5 @@ IMAGES_STORE = FILES_STORE
 DOWNLOAD_FAIL_ON_DATALOSS = False  # 文件过大警告
 
 SPIDER_BLOG_TYPE = "original"  # 爬取规则：original or forward
-SPIDER_UID = "7367188627"  # cookie的uid
+SPIDER_UID = ""  # cookie的uid
 SPIDER_GROUP = "特别关注"  # 根据分组爬取
