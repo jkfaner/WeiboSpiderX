@@ -11,11 +11,11 @@
 """
 import json
 
-from WeiboSpiderX.items.base import BaseItem
-from WeiboSpiderX.items.video import Video
+from WeiboSpiderX.bean.base import BaseItem
+from WeiboSpiderX.bean.video import Video
 
 
-class Media(BaseItem):
+class MediaItem(BaseItem):
 
     def __init__(self):
         self._blog = None

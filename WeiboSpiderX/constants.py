@@ -13,6 +13,7 @@
 LOGIN_KEY = "weibo:login"
 USER_KEY = "weibo:user"
 MEDIA_KEY = "weibo:media"
+FULL_KEY = "weibo:full"
 
 DOWNLOAD_PATH_IMG_FORWARD_STR = "img/转发微博图片"
 DOWNLOAD_PATH_VIDEO_FORWARD_STR = "video/转发微博视频"

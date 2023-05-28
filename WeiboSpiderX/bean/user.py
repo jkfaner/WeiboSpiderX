@@ -11,7 +11,7 @@
 """
 import json
 
-from WeiboSpiderX.items.base import BaseItem
+from WeiboSpiderX.bean.base import BaseItem
 
 
 class UserItem(BaseItem):

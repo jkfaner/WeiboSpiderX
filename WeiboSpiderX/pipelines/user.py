@@ -12,8 +12,8 @@
 from typing import Union, List
 
 from WeiboSpiderX import constants
+from WeiboSpiderX.bean.user import UserItem
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
-from WeiboSpiderX.items.user import UserItem
 
 
 class UserPipeline:

@@ -7,7 +7,7 @@
 @Time:2023/5/27 11:37
 @Project:WeiboSpiderX
 @File:cookie.py
-@Desc:
+@Desc: TODO 需要重新实现
 """
 import json
 import sys
@@ -64,6 +64,7 @@ class HandleCookieMiddleware:
         return response
 
     def process_request(self, request, spider):
+        # self.login()
         # 在请求中添加Cookie
         if request.meta.get("url"):
             request.cookies = self.get_cookies()
@@ -82,5 +83,4 @@ class HandleCookieMiddleware:
         if url:
             if url != response.url:
                 return True
-
         return False

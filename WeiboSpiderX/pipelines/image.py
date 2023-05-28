@@ -16,15 +16,17 @@ import scrapy
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.utils.project import get_project_settings
 
-from WeiboSpiderX.items.media import Media
+from WeiboSpiderX.bean.media import MediaItem
+from WeiboSpiderX.cache import CacheFactory
 
 
-class CustomImagesPipeline(ImagesPipeline):
+class CustomImagesPipeline(ImagesPipeline, CacheFactory):
 
     def __init__(self, *args, **kwargs):
         super(CustomImagesPipeline, self).__init__(*args, **kwargs)
         self.logger = logging.getLogger(__name__)
         self.settings = get_project_settings()
+        self.images_store = self.settings.get('IMAGES_STORE')
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # 重写文件路径的生成方法
@@ -36,13 +38,27 @@ class CustomImagesPipeline(ImagesPipeline):
         images = []
         if isinstance(item, list):
             for media in item:
-                if isinstance(media, Media):
+                if isinstance(media, MediaItem):
                     if media.is_image:
                         images.append(scrapy.Request(media.url, meta=dict(media=media)))
         return images
 
     def item_completed(self, results, item, info):
+        """
+        处理已完成下载的Item对象
+        :param results:一个包含元组的列表，每个元组代表一个媒体文件的下载结果。
+                        每个元组的第一个元素是布尔值，指示下载是否成功；
+                        第二个元素是下载结果，通常是一个字典或文件路径。
+        :param item:原始的Item对象，其中包含与媒体文件相关的字段和属性。
+        :param info:一个包含有关当前请求和响应的信息的字典。
+        :return:
+        """
         completed_list = [x for ok, x in results if ok]
+        uncompleted_list = [x for ok, x in results if not ok]
         for x in completed_list:
-            self.logger.info(f"图片下载成功: file://{self.settings.get('IMAGES_STORE')}/{quote(x.get('path'))}")
-        return completed_list
+            self.logger.info(f"图片下载成功: file://{self.images_store}/{quote(x.get('path'))}")
+        if completed_list:
+            self.spider_record(completes=completed_list, item=item)
+        print("uncompleted_list:{}".format(len(uncompleted_list)))
+        return item
+

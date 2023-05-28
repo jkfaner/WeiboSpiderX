@@ -5,12 +5,14 @@ from urllib.parse import urlencode
 import scrapy
 from scrapy_redis.spiders import RedisSpider
 
+from WeiboSpiderX.bean.item import RequestMeta, RequestParam
+from WeiboSpiderX.bean.user import UserItem
+from WeiboSpiderX.cache import Cache
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
-from WeiboSpiderX.items.item import RequestMeta, RequestParam
 
 
-class WeiboSpider(RedisSpider, ABC):
+class WeiboSpider(RedisSpider, Cache, ABC):
     name = "weibo"
 
     def __init__(self, **kwargs):
@@ -59,6 +61,19 @@ class WeiboSpider(RedisSpider, ABC):
         p.meta = meta.to_dict()
         p.callback = callback
         return p
+
+    def test(self):
+        user = UserItem()
+        # user.idstr = "5620230193"
+        # user.screen_name = "175灵敏"
+        # user.idstr = "7796248561"
+        # user.screen_name = "-Wsssui-"
+        user.idstr = "3700763437"
+        user.screen_name = "女刺客儿"
+        self.logger.info("首次获取{}的博客...".format(user.screen_name))
+        params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
+        item = self.request(self.user_blog_url, params, self.process_blogs)
+        yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
 
     def start_requests(self):
         """
@@ -129,14 +144,18 @@ class WeiboSpider(RedisSpider, ABC):
         finder = JsonDataFinderFactory(response.text)
         if finder.exist_key("list"):
             yield dict(blog=response.text)
-
             time.sleep(1)
-
             # 获取博客
-            self.logger.info("获取其他博客...")
             since_id = finder.get_first_value("since_id")
+            query = response.meta["params"]
+            uid = query["uid"]
+            self.logger.info("获取其他博客...")
             if since_id:
-                query = response.meta["params"]
-                params = {"uid": query["uid"], "page": query["page"] + 1, "since_id": since_id, "feature": 0}
+                params = {"uid": uid, "page": query["page"] + 1, "since_id": since_id, "feature": 0}
                 item = self.request(self.user_blog_url, params, self.process_blogs)
                 yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
+            else:
+                # 刷新本地
+                full = self.get_cache(uid)
+                full.is_end = True
+                self.set_redis(uid=uid, value=full)

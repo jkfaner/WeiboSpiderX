@@ -11,10 +11,10 @@
 '''
 import json
 
-from WeiboSpiderX.items.base import BaseItem
+from WeiboSpiderX.bean.base import BaseItem
 
 
-class Blog(BaseItem):
+class BlogItem(BaseItem):
 
     def __init__(self):
         self._is_top = None

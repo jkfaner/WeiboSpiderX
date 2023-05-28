@@ -27,7 +27,7 @@ class TooManyRequestsRetryMiddleware(RetryMiddleware):
         return cls(crawler)
 
     def process_response(self, request, response, spider):
-        if response.status == 403:
+        if response.status == 414:
             self.logger.info("[{}]当前请求：{}".format(response.status,response.url))
             self.crawler.engine.pause()
             time.sleep(60 * 10)  # If the rate limit is renewed in a minute, put 60 seconds, and so on.

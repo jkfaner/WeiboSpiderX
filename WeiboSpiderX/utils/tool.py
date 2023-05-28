@@ -15,7 +15,7 @@ import os
 from typing import Union
 from urllib.parse import urlparse
 
-from WeiboSpiderX.items.base import BaseItem
+from WeiboSpiderX.bean.base import BaseItem
 
 
 def read_json_file(file_path: str) -> Union[dict, list]:
@@ -66,11 +66,25 @@ def get_file_suffix(url):
     return suffix
 
 
-def time_formatting(created_at):
+def file_time_formatting(created_at):
     """
-    时间格式化
+    文件时间格式化
     :param created_at: 'Fri Dec 24 03:49:03 +0800 2021'
     :return: 格式化后的时间字符串
     """
     dt_obj = datetime.datetime.strptime(created_at, '%a %b %d %H:%M:%S %z %Y')
     return dt_obj.strftime("%Y%m%d")
+
+
+def blog_time_formatting(created_at):
+    """
+    博客时间格式化
+    :param created_at: 'Fri Dec 24 03:49:03 +0800 2021'
+    :return:
+    """
+    dt_obj = datetime.datetime.strptime(created_at, '%a %b %d %H:%M:%S %z %Y')
+    return dt_obj.astimezone(tz=None).strftime('%Y-%m-%d %H:%M:%S')
+
+
+def get_time_now():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

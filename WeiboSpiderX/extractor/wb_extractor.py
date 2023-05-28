@@ -13,13 +13,13 @@ import sys
 from typing import List
 
 from WeiboSpiderX import constants
+from WeiboSpiderX.bean.blog import BlogItem
+from WeiboSpiderX.bean.blogType import BlogTypeItem
+from WeiboSpiderX.bean.media import MediaItem
+from WeiboSpiderX.bean.user import UserItem
+from WeiboSpiderX.bean.video import Video
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
-from WeiboSpiderX.items.blog import Blog
-from WeiboSpiderX.items.blogType import BlogType
-from WeiboSpiderX.items.media import Media
-from WeiboSpiderX.items.user import UserItem
-from WeiboSpiderX.items.video import Video
-from WeiboSpiderX.utils.tool import set_attr, time_formatting, get_file_suffix
+from WeiboSpiderX.utils.tool import set_attr, file_time_formatting, get_file_suffix
 
 
 def extractor_user(json_str) -> List[UserItem]:
@@ -33,7 +33,7 @@ def extractor_user(json_str) -> List[UserItem]:
     user = user if user else finder.find_first_value('user')
     if isinstance(user, list):
         for _user in user:
-            if isinstance(_user,dict):
+            if isinstance(_user, dict):
                 users.append(set_attr(source=_user, entity=UserItem()))
             else:
                 print(json_str)
@@ -48,15 +48,17 @@ def extractor_user(json_str) -> List[UserItem]:
 
 class ExtractorBlog:
 
-    def extractor_blog(self, json_str: str) -> List[BlogType]:
+    def extractor_blog(self, json_str: str) -> List[BlogTypeItem]:
         finder = JsonDataFinderFactory(json_str)
         statuses_blogs = [self._clean_blog(item) for item in finder.find_first_value("statuses")]
         list_blogs = [self._clean_blog(item) for item in finder.find_first_value("list")]
         statuses_blogs.extend(list_blogs)
+        # 排除点赞、快转等空微博
+        statuses_blogs = [s for s in statuses_blogs if s.original is not None]
         return statuses_blogs
 
-    def _clean_blog(self, item: dict) -> BlogType:
-        blogType = BlogType()
+    def _clean_blog(self, item: dict) -> BlogTypeItem:
+        blogType = BlogTypeItem()
         # 点赞 快转 出现的按钮标签 followBtnCode
         # 快转了 screen_name_suffix_new
         if "followBtnCode" in item:
@@ -96,14 +98,14 @@ class ExtractorBlog:
 
         return blogType
 
-    def _process_blog(self, item: dict, is_original: bool) -> Blog:
+    def _process_blog(self, item: dict, is_original: bool) -> BlogItem:
         """
         加工博客
         :param item:
         :param is_original: 是否原创
         :return:
         """
-        blog = Blog()
+        blog = BlogItem()
         finder = JsonDataFinderFactory(item)
 
         # 检查是否是置顶 置顶数据在筛选过程中不中断
@@ -200,16 +202,16 @@ class ExtractorBlog:
         return [set_attr(video, Video()) for video in finder.find_all_values("play_info")]
 
 
-def extract_media(blogs: List[Blog]) -> List[Media]:
+def extract_media(blogs: List[BlogItem]) -> List[MediaItem]:
     medias = []
     for blog in blogs:
 
         # 视频
         if blog.videos:
-            base_filename = f"{time_formatting(blog.created_at)}_{blog.blog_id}"
+            base_filename = f"{file_time_formatting(blog.created_at)}_{blog.blog_id}"
             filename = f"{base_filename}.mp4"
 
-            video_media = Media()
+            video_media = MediaItem()
             video_media.blog = blog
             video_media.blog_id = blog.blog_id
             video_media.filename = filename
@@ -224,10 +226,10 @@ def extract_media(blogs: List[Blog]) -> List[Media]:
         # 图片
         for index, image in enumerate(blog.images):
             suffix = get_file_suffix(image["url"])
-            base_filename = f"{time_formatting(blog.created_at)}_{blog.blog_id}"
+            base_filename = f"{file_time_formatting(blog.created_at)}_{blog.blog_id}"
             filename = f"{base_filename}_{index}.{suffix}"
 
-            image_media = Media()
+            image_media = MediaItem()
             image_media.blog = blog
             image_media.blog_id = blog.blog_id
             image_media.filename = filename
@@ -242,10 +244,10 @@ def extract_media(blogs: List[Blog]) -> List[Media]:
         # livephoto
         for index, livephoto in enumerate(blog.livephoto_video):
             suffix = get_file_suffix(livephoto["url"])
-            base_filename = f"{time_formatting(blog.created_at)}_{blog.blog_id}"
+            base_filename = f"{file_time_formatting(blog.created_at)}_{blog.blog_id}"
             filename = f"{base_filename}_{index}.{suffix}"
 
-            live_media = Media()
+            live_media = MediaItem()
             live_media.blog = blog
             live_media.blog_id = blog.blog_id
             live_media.filename = filename

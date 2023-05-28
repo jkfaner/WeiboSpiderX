@@ -49,7 +49,8 @@ CONCURRENT_REQUESTS = 1  # 并发请求的最大数量
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     "WeiboSpiderX.middleware.retry.TooManyRequestsRetryMiddleware": 299,
-    "WeiboSpiderX.middleware.cookie.HandleCookieMiddleware": 300,
+    "WeiboSpiderX.middleware.cookie.HandleCookieMiddleware": 1,
+    "WeiboSpiderX.middleware.flow.URLFilterMiddleware": 301,
 }
 
 # Enable or disable extensions
@@ -64,7 +65,7 @@ ITEM_PIPELINES = {
     "WeiboSpiderX.pipelines.user.UserPipeline": 299,
     "WeiboSpiderX.pipelines.blog.BlogPipeline": 300,
     "WeiboSpiderX.pipelines.image.CustomImagesPipeline": 301,
-    "WeiboSpiderX.pipelines.video.VideoDownloadPipeline": 302,
+    "WeiboSpiderX.pipelines.video.VideoDownloadPipeline": 301,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -146,5 +147,5 @@ IMAGES_STORE = FILES_STORE
 DOWNLOAD_FAIL_ON_DATALOSS = False  # 文件过大警告
 
 SPIDER_BLOG_TYPE = "original"  # 爬取规则：original or forward
-SPIDER_UID = ""  # cookie的uid
+SPIDER_UID = "7367188627"  # cookie的uid
 SPIDER_GROUP = "特别关注"  # 根据分组爬取

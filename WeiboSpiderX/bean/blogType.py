@@ -11,10 +11,10 @@
 """
 import json
 
-from WeiboSpiderX.items.base import BaseItem
+from WeiboSpiderX.bean.base import BaseItem
 
 
-class BlogType(BaseItem):
+class BlogTypeItem(BaseItem):
 
     def __init__(self):
         self._forward = None

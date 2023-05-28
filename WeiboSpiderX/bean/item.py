@@ -11,7 +11,7 @@
 """
 import json
 
-from WeiboSpiderX.items.base import BaseItem
+from WeiboSpiderX.bean.base import BaseItem
 
 
 class RequestMeta(BaseItem):
@@ -20,6 +20,15 @@ class RequestMeta(BaseItem):
         self._url = None
         self._raw_url = None
         self._params = None
+        self._uid = None
+
+    @property
+    def uid(self):
+        return self._uid
+
+    @uid.setter
+    def uid(self, value):
+        self._uid = value
 
     @property
     def url(self):
