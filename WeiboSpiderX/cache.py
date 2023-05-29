@@ -14,7 +14,7 @@ from collections import defaultdict
 from typing import List
 
 from scrapy.exceptions import IgnoreRequest
-from scrapy_redis import get_redis
+from scrapy_redis import get_redis_pool
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.bean.cache import CacheItem
@@ -24,7 +24,7 @@ from WeiboSpiderX.utils.tool import set_attr
 
 
 class Cache:
-    server = get_redis()
+    server = get_redis_pool()
     cache = {}  # 全量采集的用户标志
 
     def set_redis(self, uid, value: CacheItem):
