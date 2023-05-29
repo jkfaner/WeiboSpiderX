@@ -54,11 +54,9 @@ class CustomImagesPipeline(ImagesPipeline, CacheFactory):
         :return:
         """
         completed_list = [x for ok, x in results if ok]
-        uncompleted_list = [x for ok, x in results if not ok]
         for x in completed_list:
             self.logger.info(f"图片下载成功: file://{self.images_store}/{quote(x.get('path'))}")
         if completed_list:
             self.spider_record(completes=completed_list, item=item)
-        print("uncompleted_list:{}".format(len(uncompleted_list)))
-        return item
+        return completed_list
 

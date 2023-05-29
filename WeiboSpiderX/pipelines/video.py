@@ -54,10 +54,8 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
         :return:返回处理后的Item对象
         """
         completed_list = [x for ok, x in results if ok]
-        uncompleted_list = [x for ok, x in results if not ok]
         for x in completed_list:
             self.logger.info(f"视频下载成功:{x.get('path')} -> file://{self.files_store}/{quote(x.get('path'))}")
         if completed_list:
             self.spider_record(completes=completed_list, item=item)
-        print("uncompleted_list:{}".format(len(uncompleted_list)))
-        return item
+        return completed_list

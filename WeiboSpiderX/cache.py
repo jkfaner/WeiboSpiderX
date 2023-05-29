@@ -124,6 +124,7 @@ class CacheFactory(Cache):
             self.set_redis(uid, full)  # 持续化缓存
         else:
             full = self.get_redis(uid)
+            full.last_total = full.total
             full.total = full.total if total == 0 else total  # 刷新博客数
             self.set_redis(uid, full)  # 持续化缓存
 
@@ -159,5 +160,6 @@ class CacheFactory(Cache):
             for x in completes:
                 if x.get("url") == url and blog_id not in blog_ids:
                     blog_ids.append(blog_id)
+                    full.last_total += 1  # 计数
                     self.set_redis(uid, full)
                     break  # 添加之后不会再次添加

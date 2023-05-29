@@ -68,8 +68,10 @@ class WeiboSpider(RedisSpider, Cache, ABC):
         # user.screen_name = "175灵敏"
         # user.idstr = "7796248561"
         # user.screen_name = "-Wsssui-"
-        user.idstr = "3700763437"
-        user.screen_name = "女刺客儿"
+        # user.idstr = "3700763437"
+        # user.screen_name = "女刺客儿"
+        user.idstr = "7773567521"
+        user.screen_name = "溪溪很甜呀"
         self.logger.info("首次获取{}的博客...".format(user.screen_name))
         params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
         item = self.request(self.user_blog_url, params, self.process_blogs)
@@ -159,3 +161,5 @@ class WeiboSpider(RedisSpider, Cache, ABC):
                 full = self.get_cache(uid)
                 full.is_end = True
                 self.set_redis(uid=uid, value=full)
+                self.logger.info("微博获取结束:{}".format(uid))
+                self.logger.info(full.to_json())

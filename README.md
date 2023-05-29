@@ -1,5 +1,5 @@
 <a href="https://github.com/jkfaner/WeiboSpider">
- <img alt="weibo-spider-Logo" src="https://github.com/jkfaner/WeiboSpider/blob/master/image/icons8-微博.svg">
+ <img alt="weibo-spider-Logo" src="assets/image/icons8-微博.svg">
 </a>
 
 # WeiboSpider

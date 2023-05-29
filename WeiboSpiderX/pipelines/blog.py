@@ -64,7 +64,7 @@ class BlogPipeline(CacheFactory):
             ext = ExtractorBlog()
             blogs = ext.extractor_blog(item["blog"])
             medias = self.filter_blog_type(item=blogs)
-            # for media in medias:
-            #     if not self.server.hexists(self.redis_name, media.blog_id):
-            #         self.server.hset(self.redis_name, media.blog_id, media.to_json())
+            for media in medias:
+                if not self.server.hexists(self.redis_name, media.blog_id):
+                    self.server.hset(self.redis_name, media.blog_id, media.to_json())
             return medias
