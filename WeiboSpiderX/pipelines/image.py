@@ -16,7 +16,6 @@ import scrapy
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.utils.project import get_project_settings
 
-from WeiboSpiderX.bean.media import MediaItem
 from WeiboSpiderX.cache import CacheFactory
 
 
