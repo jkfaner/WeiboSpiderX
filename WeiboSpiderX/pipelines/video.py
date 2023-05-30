@@ -35,7 +35,7 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
 
     def get_media_requests(self, item, info):
         # 获取视频URL并生成下载请求
-        if item.get("videos"):
+        if isinstance(item, dict) and item.get("videos"):
             for media in item.get("videos"):
                 yield scrapy.Request(media.url, meta=dict(media=media))
         return item

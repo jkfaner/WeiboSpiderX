@@ -35,7 +35,7 @@ class CustomImagesPipeline(ImagesPipeline, CacheFactory):
 
     def get_media_requests(self, item, info):
         # 在这里生成下载图片的请求
-        if item.get("images"):
+        if isinstance(item, dict) and item.get("images"):
             for media in item.get("images"):
                 yield scrapy.Request(media.url, meta=dict(media=media))
         return item
