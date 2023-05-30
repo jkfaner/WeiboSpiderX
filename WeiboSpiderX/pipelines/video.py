@@ -35,13 +35,10 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
 
     def get_media_requests(self, item, info):
         # 获取视频URL并生成下载请求
-        video_live_list = []
-        if isinstance(item, list):
-            for media in item:
-                if isinstance(media, MediaItem):
-                    if media.is_video or media.is_live:
-                        video_live_list.append(scrapy.Request(media.url, meta=dict(media=media)))
-        return video_live_list
+        if item.get("videos"):
+            for media in item.get("videos"):
+                yield scrapy.Request(media.url, meta=dict(media=media))
+        return item
 
     def item_completed(self, results, item, info):
         """
@@ -57,5 +54,5 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
         for x in completed_list:
             self.logger.info(f"视频下载成功:{x.get('path')} -> file://{self.files_store}/{quote(x.get('path'))}")
         if completed_list:
-            self.spider_record(completes=completed_list, item=item)
-        return completed_list
+            self.spider_record(completes=completed_list, item=item["videos"])
+        return item

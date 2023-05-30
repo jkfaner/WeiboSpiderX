@@ -65,7 +65,7 @@ ITEM_PIPELINES = {
     "WeiboSpiderX.pipelines.user.UserPipeline": 299,
     "WeiboSpiderX.pipelines.blog.BlogPipeline": 300,
     "WeiboSpiderX.pipelines.image.CustomImagesPipeline": 301,
-    "WeiboSpiderX.pipelines.video.VideoDownloadPipeline": 301,
+    "WeiboSpiderX.pipelines.video.VideoDownloadPipeline": 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

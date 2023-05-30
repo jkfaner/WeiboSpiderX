@@ -26,8 +26,8 @@ class TestWeiBo(WeiboSpider):
         user.screen_name = "-Wsssui-"
         # user.idstr = "3700763437"
         # user.screen_name = "女刺客儿"
-        # user.idstr = "7773567521"
-        # user.screen_name = "溪溪很甜呀"
+        user.idstr = "6091593545"
+        user.screen_name = "Lee_and_Lee"
         self.logger.info("首次获取{}的博客...".format(user.screen_name))
         params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
         item = self.request(self.user_blog_url, params, self.process_blogs)

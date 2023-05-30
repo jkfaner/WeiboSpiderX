@@ -35,13 +35,10 @@ class CustomImagesPipeline(ImagesPipeline, CacheFactory):
 
     def get_media_requests(self, item, info):
         # 在这里生成下载图片的请求
-        images = []
-        if isinstance(item, list):
-            for media in item:
-                if isinstance(media, MediaItem):
-                    if media.is_image:
-                        images.append(scrapy.Request(media.url, meta=dict(media=media)))
-        return images
+        if item.get("images"):
+            for media in item.get("images"):
+                yield scrapy.Request(media.url, meta=dict(media=media))
+        return item
 
     def item_completed(self, results, item, info):
         """
@@ -57,6 +54,5 @@ class CustomImagesPipeline(ImagesPipeline, CacheFactory):
         for x in completed_list:
             self.logger.info(f"图片下载成功: file://{self.images_store}/{quote(x.get('path'))}")
         if completed_list:
-            self.spider_record(completes=completed_list, item=item)
-        return completed_list
-
+            self.spider_record(completes=completed_list, item=item["images"])
+        return item
