@@ -7,7 +7,7 @@
 @Time:2023/5/24 23:31
 @Project:WeiboSpiderX
 @File:image.py
-@Desc:
+@Desc:图片下载管道
 """
 import logging
 from urllib.parse import quote
@@ -20,13 +20,12 @@ from WeiboSpiderX.bean.media import MediaItem
 from WeiboSpiderX.cache import CacheFactory
 
 
-class CustomImagesPipeline(ImagesPipeline, CacheFactory):
+class ImageDownloadPipeline(ImagesPipeline, CacheFactory):
 
     def __init__(self, *args, **kwargs):
-        super(CustomImagesPipeline, self).__init__(*args, **kwargs)
+        super(ImageDownloadPipeline, self).__init__(*args, **kwargs)
         self.logger = logging.getLogger(__name__)
-        self.settings = get_project_settings()
-        self.images_store = self.settings.get('IMAGES_STORE')
+        self.images_store = get_project_settings().get('IMAGES_STORE')
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # 重写文件路径的生成方法
@@ -35,8 +34,8 @@ class CustomImagesPipeline(ImagesPipeline, CacheFactory):
 
     def get_media_requests(self, item, info):
         # 在这里生成下载图片的请求
-        if isinstance(item, dict) and item.get("images"):
-            for media in item.get("images"):
+        if isinstance(item, dict):
+            for media in item.get("images", []):
                 yield scrapy.Request(media.url, meta=dict(media=media))
         return item
 

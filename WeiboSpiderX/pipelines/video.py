@@ -7,7 +7,7 @@
 @Time:2023/5/24 23:32
 @Project:WeiboSpiderX
 @File:video.py
-@Desc:
+@Desc:视频下载管道
 """
 import logging
 from urllib.parse import quote
@@ -25,8 +25,7 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
     def __init__(self, *args, **kwargs):
         super(VideoDownloadPipeline, self).__init__(*args, **kwargs)
         self.logger = logging.getLogger(__name__)
-        self.settings = get_project_settings()
-        self.files_store = self.settings.get('FILES_STORE')
+        self.files_store = get_project_settings().get('FILES_STORE')
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # 重写文件路径的生成方法
@@ -35,8 +34,8 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
 
     def get_media_requests(self, item, info):
         # 获取视频URL并生成下载请求
-        if isinstance(item, dict) and item.get("videos"):
-            for media in item.get("videos"):
+        if isinstance(item, dict):
+            for media in item.get("videos", []):
                 yield scrapy.Request(media.url, meta=dict(media=media))
         return item
 

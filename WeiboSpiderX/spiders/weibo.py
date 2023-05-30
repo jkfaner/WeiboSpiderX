@@ -98,7 +98,7 @@ class WeiboSpider(RedisSpider, Cache, ABC):
         if users:
             yield {"user": response.text}
 
-            time.sleep(1)
+            time.sleep(2)
 
             params = response.meta.get("params")
             params["page"] = params["page"] + 1
@@ -130,7 +130,7 @@ class WeiboSpider(RedisSpider, Cache, ABC):
         finder = JsonDataFinderFactory(response.text)
         if finder.exist_key("list"):
             yield dict(blog=response.text)
-            time.sleep(1)
+            time.sleep(2)
             # 获取博客
             since_id = finder.get_first_value("since_id")
             query = response.meta["params"]

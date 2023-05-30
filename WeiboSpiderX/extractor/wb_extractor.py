@@ -9,36 +9,35 @@
 @File:wb_extractor.py
 @Desc:
 """
-import sys
 from typing import List
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.bean.blog import BlogItem
 from WeiboSpiderX.bean.blogType import BlogTypeItem
-from WeiboSpiderX.bean.media import MediaItem
 from WeiboSpiderX.bean.user import UserItem
 from WeiboSpiderX.bean.video import Video
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
-from WeiboSpiderX.utils.tool import set_attr, file_time_formatting, get_file_suffix
+from WeiboSpiderX.utils.tool import set_attr
 
 
 def extractor_user(json_str) -> List[UserItem]:
-    finder = JsonDataFinderFactory(json_str)
-    users = list()
+    """
+    提取用户
+    :param json_str:
+    :return: 用户列表
+    """
+    users = []
     if not json_str:
         users.append(UserItem())
         return users
-
-    user = finder.find_all_values("users")
-    user = user if user else finder.find_first_value('user')
+    finder = JsonDataFinderFactory(json_str)
+    user = finder.find_all_values("users") or finder.find_first_value('user')
     if isinstance(user, list):
         for _user in user:
             if isinstance(_user, dict):
                 users.append(set_attr(source=_user, entity=UserItem()))
             else:
-                print(json_str)
-                print(user)
-                sys.exit("extractor_user")
+                raise ValueError("Unable to extract user items from JSON:\n{}".format(user))
     elif isinstance(user, dict):
         users.append(set_attr(source=user, entity=UserItem()))
     else:
@@ -200,63 +199,3 @@ class ExtractorBlog:
         """
         finder = JsonDataFinderFactory(item)
         return [set_attr(video, Video()) for video in finder.find_all_values("play_info")]
-
-
-def extract_media(blogs: List[BlogItem]) -> List[MediaItem]:
-    medias = []
-    for blog in blogs:
-
-        # 视频
-        if blog.videos:
-            base_filename = f"{file_time_formatting(blog.created_at)}_{blog.blog_id}"
-            filename = f"{base_filename}.mp4"
-
-            video_media = MediaItem()
-            video_media.blog = blog
-            video_media.blog_id = blog.blog_id
-            video_media.filename = filename
-            video_media.filepath = f"{blog.screen_name}/{blog.video_str}/{filename}"
-            video_media.folder_name = blog.video_str
-            video_media.url = blog.videos.url
-            video_media.is_live = False
-            video_media.is_image = False
-            video_media.is_video = True
-            medias.append(video_media)
-
-        # 图片
-        for index, image in enumerate(blog.images):
-            suffix = get_file_suffix(image["url"])
-            base_filename = f"{file_time_formatting(blog.created_at)}_{blog.blog_id}"
-            filename = f"{base_filename}_{index}.{suffix}"
-
-            image_media = MediaItem()
-            image_media.blog = blog
-            image_media.blog_id = blog.blog_id
-            image_media.filename = filename
-            image_media.folder_name = blog.image_str
-            image_media.filepath = f"{blog.screen_name}/{blog.image_str}/{filename}"
-            image_media.url = image['url']
-            image_media.is_live = False
-            image_media.is_image = True
-            image_media.is_video = False
-            medias.append(image_media)
-
-        # livephoto
-        for index, livephoto in enumerate(blog.livephoto_video):
-            suffix = get_file_suffix(livephoto["url"])
-            base_filename = f"{file_time_formatting(blog.created_at)}_{blog.blog_id}"
-            filename = f"{base_filename}_{index}.{suffix}"
-
-            live_media = MediaItem()
-            live_media.blog = blog
-            live_media.blog_id = blog.blog_id
-            live_media.filename = filename
-            live_media.filepath = f"{blog.screen_name}/{blog.video_str}/{filename}"
-            live_media.folder_name = blog.video_str
-            live_media.url = livephoto['url']
-            live_media.is_live = True
-            live_media.is_image = False
-            live_media.is_video = False
-            medias.append(live_media)
-
-    return medias

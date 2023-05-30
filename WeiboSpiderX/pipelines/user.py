@@ -7,7 +7,7 @@
 @Time:2023/5/24 23:31
 @Project:WeiboSpiderX
 @File:user.py
-@Desc:
+@Desc:用户管道
 """
 from typing import Union, List
 

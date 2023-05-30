@@ -20,5 +20,5 @@ DOWNLOAD_PATH_VIDEO_FORWARD_STR = "video/转发微博视频"
 DOWNLOAD_PATH_IMG_ORIGINAL_STR = "img/原创微博图片"
 DOWNLOAD_PATH_VIDEO_ORIGINAL_STR = "video/原创微博视频"
 
-BLOG_FILTER_ORIGINAL = "original"
-BLOG_FILTER_FORWARD = "forward"
+ORIGINAL = "original"
+FORWARD = "forward"

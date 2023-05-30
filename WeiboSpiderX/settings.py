@@ -65,7 +65,7 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     "WeiboSpiderX.pipelines.user.UserPipeline": 299,
     "WeiboSpiderX.pipelines.blog.BlogPipeline": 300,
-    "WeiboSpiderX.pipelines.image.CustomImagesPipeline": 301,
+    "WeiboSpiderX.pipelines.image.ImageDownloadPipeline": 301,
     "WeiboSpiderX.pipelines.video.VideoDownloadPipeline": 302,
 }
 
