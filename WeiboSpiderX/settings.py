@@ -47,10 +47,11 @@ CONCURRENT_REQUESTS = 64  # 并发请求的最大数量
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
+# 数字越小请求越先执行 同时响应越晚执行
 DOWNLOADER_MIDDLEWARES = {
-    "WeiboSpiderX.middleware.retry.TooManyRequestsRetryMiddleware": 299,
-    "WeiboSpiderX.middleware.cookie.HandleCookieMiddleware": 1,
-    "WeiboSpiderX.middleware.flow.URLFilterMiddleware": 301,
+    "WeiboSpiderX.middleware.cookie.HandleCookieMiddleware": 300,
+    "WeiboSpiderX.middleware.retry.TooManyRequestsRetryMiddleware": 301,
+    "WeiboSpiderX.middleware.flow.URLFilterMiddleware": 302,
 }
 
 # Enable or disable extensions
