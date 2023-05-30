@@ -6,7 +6,6 @@ import scrapy
 from scrapy_redis.spiders import RedisSpider
 
 from WeiboSpiderX.bean.item import RequestMeta, RequestParam
-from WeiboSpiderX.bean.user import UserItem
 from WeiboSpiderX.cache import Cache
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
@@ -61,21 +60,6 @@ class WeiboSpider(RedisSpider, Cache, ABC):
         p.meta = meta.to_dict()
         p.callback = callback
         return p
-
-    def test(self):
-        user = UserItem()
-        # user.idstr = "5620230193"
-        # user.screen_name = "175灵敏"
-        # user.idstr = "7796248561"
-        # user.screen_name = "-Wsssui-"
-        # user.idstr = "3700763437"
-        # user.screen_name = "女刺客儿"
-        user.idstr = "7773567521"
-        user.screen_name = "溪溪很甜呀"
-        self.logger.info("首次获取{}的博客...".format(user.screen_name))
-        params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
-        item = self.request(self.user_blog_url, params, self.process_blogs)
-        yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
 
     def start_requests(self):
         """

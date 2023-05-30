@@ -13,4 +13,5 @@ from scrapy import cmdline
 
 if __name__ == '__main__':
     cmd = 'scrapy crawl weibo'
+    cmd = 'scrapy crawl test'
     cmdline.execute(cmd.split())

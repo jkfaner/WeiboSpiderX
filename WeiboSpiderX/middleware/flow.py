@@ -30,8 +30,5 @@ class URLFilterMiddleware(CacheFactory):
         if request.meta.get("raw_url") != spider.user_blog_url:
             return response
         self.init_spider_record(request, response)
+        self.request_filter(request)
         return response
-
-    def process_request(self, request, spider):
-        if request.meta.get("raw_url") == spider.user_blog_url:
-            self.request_filter(request)
