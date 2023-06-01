@@ -11,12 +11,14 @@
 [![GitHub stars](https://img.shields.io/github/stars/jkfaner/apple-monitor.svg)](https://github.com/jkfaner/apple-monitor)
 
 ### 功能
+微博数据采集
 
-爬取关注用户的图片数据，包括但不限于视频、livephoto数据。
+### 更新
 
-### 特点
-
-- 根据登录分组采集
+- 20230601：实现数据增量式采集，已采集过的数据不再采集，执行效率更高
+- 20230523：取消自定义用户，更改为爬取特别关注
+- 20230522：可自定义博主
+- 20230521：实现博主的媒体数据采集，包括但不限于图片、视频、live图片
 
 ### 使用说明
 
@@ -28,7 +30,7 @@
 ```
 
 2. 依赖安装
-3. 可直接执行run.py
+3. 可直接执行run.py 或 修改并执行`run.sh`
 #### 部署
 - Gerapy客户端
 ```angular2html

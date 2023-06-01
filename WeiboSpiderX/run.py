@@ -7,11 +7,11 @@
 @Time:2023/5/20 19:27
 @Project:WeiboSpiderX
 @File:run.py
-@Desc:
+@Desc:debug开发使用
 """
 from scrapy import cmdline
 
 if __name__ == '__main__':
-    cmd = 'scrapy crawl weibo'
-    # cmd = 'scrapy crawl test'
+    # cmd = 'scrapy crawl weibo'
+    cmd = 'scrapy crawl test'
     cmdline.execute(cmd.split())
