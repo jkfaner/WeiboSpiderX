@@ -10,6 +10,7 @@
 @Desc:
 """
 import datetime
+import hashlib
 import json
 import os
 from typing import Union
@@ -43,7 +44,7 @@ def set_attr(source: dict, entity: BaseItem):
     :return:
     """
     for k, v in entity.to_dict().items():
-        setattr(entity, k, source.get(k))
+        setattr(entity, k, source.get(k, v))
     return entity
 
 

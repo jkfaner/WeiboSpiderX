@@ -91,6 +91,8 @@ class CacheFactory(Cache):
         """
         for uid, blog_ids in self.filter_blog_id(medias).items():
             full = self.get_cache(uid)
+            # 修改有效值
+            full.real_total = len(full.blog_ids)
 
             # 首次添加
             if full.real_total == 0:
