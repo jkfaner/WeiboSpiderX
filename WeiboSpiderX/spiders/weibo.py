@@ -112,7 +112,7 @@ class WeiboSpider(RefreshWeibo, ABC):
                 yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
             else:
                 # 刷新本地
-                full = self.get_cache(uid)
+                full = self.get_redis(uid)
                 full.is_end = True
                 self.set_redis(uid=uid, value=full)
                 self.logger.info("微博获取结束:{}".format(uid))
