@@ -9,15 +9,18 @@
 @File:base.py
 @Desc:
 """
-from abc import ABC, abstractmethod
+import json
 
 
-class BaseItem(ABC):
+class BaseItem(object):
 
-    @abstractmethod
     def to_dict(self):
-        raise NotImplementedError("子类必须实现to_dict()方法")
+        cleaned_dict = {}
+        for key, value in self.__dict__.items():
+            if key.startswith('_'):
+                key = key[1:]
+            cleaned_dict[key] = value
+        return cleaned_dict
 
-    @abstractmethod
     def to_json(self):
-        raise NotImplementedError("子类必须实现to_json()方法")
+        return json.dumps(self.to_dict(), ensure_ascii=False)

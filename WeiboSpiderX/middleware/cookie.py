@@ -10,27 +10,29 @@
 @Desc: TODO 需要重新实现
 """
 import json
+import logging
 import sys
 
 from DecryptLogin.modules import weibo
 from requests.utils import dict_from_cookiejar
+from scrapy.exceptions import IgnoreRequest
 
 from WeiboSpiderX import constants
 
 
 class HandleCookieMiddleware:
+    is_login = False
 
-    def __init__(self, uid, redis, apis):
+    def __init__(self, uid, redis):
+        self.logger = logging.getLogger(__name__)
         self.uid = uid
         self.redis = redis
-        self.api_list = apis
 
     @classmethod
     def from_crawler(cls, crawler):
         uid = crawler.settings.get('SPIDER_UID')
         redis = crawler.spider.server
-        apis = crawler.spider.api_list
-        return cls(uid, redis, apis)
+        return cls(uid, redis)
 
     def get_cookies(self):
         """
@@ -46,30 +48,34 @@ class HandleCookieMiddleware:
         result, session = weibo().login()
         uid = result["uid"]
         if uid != self.uid:
-            sys.exit("当前登录用户与设置用户不一致！")
+            self.logger.error("当前登录用户与设置用户不一致！")
+            raise Exception("当前登录用户与设置用户不一致！")
         cookie = dict_from_cookiejar(session.cookies)
         self.redis.hset(constants.LOGIN_KEY, self.uid, json.dumps(cookie))
+        self.is_login = True
+        self.logger.info("登录成功...")
 
     def process_response(self, request, response, spider):
         # 检查响应是否表示登录失败
         if self.cookie_failed(request, response):
-            # 登录失败，重新登录
-            self.login()
+            if not self.is_login:
+                # 登录失败，重新登录
+                self.login()
 
-            # 重新发送原始请求
-            new_request = request.copy()
-            new_request.dont_filter = True
-            return new_request
+            if request.meta.get("url") != response.url:
+                # 重新发送原始请求
+                new_request = request.replace(url=request.meta.get("url"))
+                new_request.dont_filter = True
+                return new_request
+            else:
+                raise IgnoreRequest("URL filtered: {}".format(request.url))
 
         return response
 
     def process_request(self, request, spider):
-        # self.login()
         # 在请求中添加Cookie
         if request.meta.get("url"):
             request.cookies = self.get_cookies()
-        # else:
-        #     request.headers = {"Accept": "*/*"}
 
     @staticmethod
     def cookie_failed(request, response):

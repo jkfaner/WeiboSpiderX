@@ -15,20 +15,20 @@ from WeiboSpiderX.cache import CacheFactory
 
 class URLFilterMiddleware(CacheFactory):
 
-    def __init__(self, uid, apis):
+    def __init__(self, uid):
         super(URLFilterMiddleware, self).__init__()
         self.uid = uid
-        self.api_list = apis
 
     @classmethod
     def from_crawler(cls, crawler):
         uid = crawler.settings.get('SPIDER_UID')
-        apis = crawler.spider.api_list
-        return cls(uid, apis)
+        return cls(uid)
 
     def process_response(self, request, response, spider):
-        if request.meta.get("raw_url") != spider.user_blog_url:
-            return response
+        raw_url = request.meta.get("raw_url")
+        if spider.name == "weibo":
+            if raw_url != spider.user_blog_url:
+                return response
         if response.status == 414:
             return response
         self.init_spider_record(request, response)

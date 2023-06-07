@@ -10,13 +10,34 @@
 @Desc:
 """
 import datetime
-import hashlib
 import json
 import os
 from typing import Union
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 
 from WeiboSpiderX.bean.base import BaseItem
+from WeiboSpiderX.bean.item import RequestParam, RequestMeta
+
+
+def requestQuery(raw_url, params, callback) -> RequestParam:
+    """
+    获取request
+    :param raw_url: 不带任何参数的url
+    :param params: 请求参数
+    :param callback: 回调方法
+    :return:
+    """
+    url = f'{raw_url}?{urlencode(params)}'
+    meta = RequestMeta()
+    meta.url = url
+    meta.raw_url = raw_url
+    meta.params = params
+
+    p = RequestParam()
+    p.url = url
+    p.meta = meta.to_dict()
+    p.callback = callback
+    return p
 
 
 def read_json_file(file_path: str) -> Union[dict, list]:

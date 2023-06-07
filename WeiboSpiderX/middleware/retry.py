@@ -9,6 +9,7 @@
 @File:retry.py
 @Desc:
 """
+import logging
 import time
 
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
@@ -20,7 +21,7 @@ class TooManyRequestsRetryMiddleware(RetryMiddleware):
     def __init__(self, crawler):
         super(TooManyRequestsRetryMiddleware, self).__init__(crawler.settings)
         self.crawler = crawler
-        self.logger = crawler.spider.logger
+        self.logger = logging.getLogger(__name__)
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -30,7 +31,7 @@ class TooManyRequestsRetryMiddleware(RetryMiddleware):
         if response.status == 414:
             self.logger.info("[{}]当前请求：{}".format(response.status,response.url))
             self.crawler.engine.pause()
-            time.sleep(60 * 10)  # If the rate limit is renewed in a minute, put 60 seconds, and so on.
+            time.sleep(60 * 2)  # If the rate limit is renewed in a minute, put 60 seconds, and so on.
             self.crawler.engine.unpause()
             reason = response_status_message(response.status)
             return self._retry(request, reason, spider) or response

@@ -9,7 +9,6 @@
 @File:Video.py
 @Desc:
 '''
-import json
 
 from WeiboSpiderX.bean.base import BaseItem
 
@@ -260,15 +259,3 @@ class Video(BaseItem):
     @tcp_receive_buffer.setter
     def tcp_receive_buffer(self, tcp_receive_buffer):
         self._tcp_receive_buffer = tcp_receive_buffer
-
-    def to_dict(self):
-        obj_dict = self.__dict__
-        cleaned_dict = {}
-        for key, value in obj_dict.items():
-            if key.startswith('_'):
-                key = key[1:]
-            cleaned_dict[key] = value
-        return cleaned_dict
-
-    def to_json(self):
-        return json.dumps(self.to_dict(), ensure_ascii=False)

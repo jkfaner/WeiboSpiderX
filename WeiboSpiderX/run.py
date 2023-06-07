@@ -12,6 +12,6 @@
 from scrapy import cmdline
 
 if __name__ == '__main__':
-    # cmd = 'scrapy crawl weibo'
-    cmd = 'scrapy crawl test'
+    cmd = 'scrapy crawl weibo'
+    # cmd = 'scrapy crawl refresh'
     cmdline.execute(cmd.split())

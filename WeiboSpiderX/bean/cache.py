@@ -9,7 +9,6 @@
 @File:cache.py
 @Desc:
 """
-import json
 
 from WeiboSpiderX.bean.base import BaseItem
 
@@ -71,15 +70,3 @@ class CacheItem(BaseItem):
     @blog_ids.setter
     def blog_ids(self, value):
         self._blog_ids = value
-
-    def to_dict(self):
-        obj_dict = self.__dict__
-        cleaned_dict = {}
-        for key, value in obj_dict.items():
-            if key.startswith('_'):
-                key = key[1:]
-            cleaned_dict[key] = value
-        return cleaned_dict
-
-    def to_json(self):
-        return json.dumps(self.to_dict(), ensure_ascii=False)

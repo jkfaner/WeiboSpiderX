@@ -1,17 +1,16 @@
 import time
 from abc import ABC
-from urllib.parse import urlencode
 
 import scrapy
-from scrapy_redis.spiders import RedisSpider
 
-from WeiboSpiderX.bean.item import RequestMeta, RequestParam
-from WeiboSpiderX.cache import Cache
+from WeiboSpiderX.aop import ScrapyLogger
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
+from WeiboSpiderX.spiders.refresh import RefreshWeibo
+from WeiboSpiderX.utils.tool import requestQuery
 
 
-class WeiboSpider(RedisSpider, Cache, ABC):
+class WeiboSpider(RefreshWeibo, ABC):
     name = "weibo"
 
     def __init__(self, **kwargs):
@@ -40,27 +39,6 @@ class WeiboSpider(RedisSpider, Cache, ABC):
         spider.settings = crawler.settings
         return spider
 
-    @staticmethod
-    def request(raw_url, params, callback) -> RequestParam:
-        """
-        获取request
-        :param raw_url: 不带任何参数的url
-        :param params: 请求参数
-        :param callback: 回调方法
-        :return:
-        """
-        url = f'{raw_url}?{urlencode(params)}'
-        meta = RequestMeta()
-        meta.url = url
-        meta.raw_url = raw_url
-        meta.params = params
-
-        p = RequestParam()
-        p.url = url
-        p.meta = meta.to_dict()
-        p.callback = callback
-        return p
-
     def start_requests(self):
         """
         爬虫入口
@@ -68,31 +46,22 @@ class WeiboSpider(RedisSpider, Cache, ABC):
         """
         return self.process_groups()
 
-    def process_groups(self):
-        """
-        获得分组
-        :return:
-        """
-        self.logger.info("获取分组...")
-        params = {"showBilateral": 1}
-        item = self.request(self.groups_url, params, self.parse_groups)
-        yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
-
+    @ScrapyLogger(start={"info": "首次获取分组下的博主..."})
     def parse_groups(self, response):
         """
         解析分组
         :param response:
         :return:
         """
-        self.logger.info("首次获取分组下的博主...")
         finder = JsonDataFinderFactory(response.text, mode="value")
         group_items = finder.get_same_level(self.settings.get("SPIDER_GROUP"))
-        params = {"list_id": group_items[0].get("idstr"), "page": 1}
-        item = self.request(self.group_members_url, params, self.process_group_members)
+        self.list_id = group_items[0].get("idstr")
+        params = {"list_id": self.list_id, "page": 1}
+        item = requestQuery(self.group_members_url, params, self.process_group_members)
         yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
 
+    @ScrapyLogger(start={"info": "获取分组下的博主..."})
     def process_group_members(self, response):
-        self.logger.info("获取分组下的博主...")
         finder = JsonDataFinderFactory(response.text)
         users = finder.find_first_value("users")
         if users:
@@ -102,7 +71,7 @@ class WeiboSpider(RedisSpider, Cache, ABC):
 
             params = response.meta.get("params")
             params["page"] = params["page"] + 1
-            item = self.request(self.group_members_url, params, self.process_group_members)
+            item = requestQuery(self.group_members_url, params, self.process_group_members)
             yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
 
             for blogs_first in self.process_blogs_first(response):
@@ -115,12 +84,13 @@ class WeiboSpider(RedisSpider, Cache, ABC):
         users = extractor_user(response.text)
         blogs_first_list = []
         for user in users:
-            self.logger.info("首次获取{}的博客...".format(user.screen_name))
+            self.logger.info("首次获取【{}->{}】的博客".format(user.screen_name,user.idstr))
             params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
-            item = self.request(self.user_blog_url, params, self.process_blogs)
+            item = requestQuery(self.user_blog_url, params, self.process_blogs)
             blogs_first_list.append(scrapy.Request(url=item.url, meta=item.meta, callback=item.callback))
         return blogs_first_list
 
+    @ScrapyLogger(start={"info": "获取博客..."})
     def process_blogs(self, response):
         """
         获取博客
@@ -138,7 +108,7 @@ class WeiboSpider(RedisSpider, Cache, ABC):
             self.logger.info("获取其他博客...")
             if since_id:
                 params = {"uid": uid, "page": query["page"] + 1, "since_id": since_id, "feature": 0}
-                item = self.request(self.user_blog_url, params, self.process_blogs)
+                item = requestQuery(self.user_blog_url, params, self.process_blogs)
                 yield scrapy.Request(url=item.url, meta=item.meta, callback=item.callback)
             else:
                 # 刷新本地

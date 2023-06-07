@@ -6,6 +6,11 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import logging
+import os.path
+from datetime import datetime
+
+from scrapy.utils.log import configure_logging
 
 BOT_NAME = "WeiboSpiderX"  # 项目名称
 
@@ -16,7 +21,7 @@ NEWSPIDER_MODULE = "WeiboSpiderX.spiders"  # 新建爬虫模块路径
 
 ROBOTSTXT_OBEY = False  # 是否遵循 robots.txt 规则
 
-CONCURRENT_REQUESTS = 64  # 并发请求的最大数量
+CONCURRENT_REQUESTS = 1  # 并发请求的最大数量
 
 # 下载延迟设置，单位为秒
 # DOWNLOAD_DELAY = 3
@@ -122,10 +127,28 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 # ===================Log========================
 # 日志
-LOG_ENABLED = True
-LOG_LEVEL = 'DEBUG'
-# LOG_FILE = 'scrapy.log'
+# LOG_ENABLED = True
 
+# 配置日志格式
+LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
+
+# 配置日志级别，默认为 DEBUG
+LOG_LEVEL = logging.DEBUG
+
+# 配置日志文件名
+LOG_FILE = f'../logs/scrapy_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
+if not os.path.exists(os.path.dirname(LOG_FILE)):
+    os.makedirs(os.path.dirname(LOG_FILE))
+# 配置日志输出
+configure_logging(install_root_handler=False)
+logging.basicConfig(
+    level=LOG_LEVEL,
+    format=LOG_FORMAT,
+    handlers=[
+        logging.StreamHandler(),  # 控制台输出
+        logging.FileHandler(LOG_FILE)  # 文件输出
+    ]
+)
 
 # ===================Redis========================
 # 启用Scrapy-Redis调度器

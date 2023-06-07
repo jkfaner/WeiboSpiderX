@@ -10,6 +10,7 @@
 @Desc:
 """
 import json
+import logging
 from collections import defaultdict
 from typing import List, Dict
 
@@ -26,6 +27,9 @@ from WeiboSpiderX.utils.tool import set_attr
 class Cache:
     server = get_redis_pool()
     cache = {}  # 全量采集的用户标志
+
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
 
     def set_redis(self, uid, value: CacheItem):
         """
@@ -83,10 +87,11 @@ class CacheFactory(Cache):
             b[m.blog.id].add(m.blog_id)
         return dict(b)
 
-    def update_cache(self, medias: List[MediaItem]):
+    def update_cache(self, medias: List[MediaItem], name):
         """
         更新缓存信息
         :param medias:媒体列表
+        :param name:spider.name
         :return:
         """
         for uid, blog_ids in self.filter_blog_id(medias).items():
@@ -94,15 +99,23 @@ class CacheFactory(Cache):
             # 修改有效值
             full.real_total = len(full.blog_ids)
 
-            # 首次添加
-            if full.real_total == 0:
-                full.real_total += len(blog_ids)
-                self.set_redis(uid, full)
+            if name == "weibo":
+                # 首次添加
+                if full.real_total == 0:
+                    full.real_total += len(blog_ids)
+                    self.set_redis(uid, full)
 
-            # 其次添加
-            elif full.real_total <= full.total and not full.is_end:
-                full.real_total += len(blog_ids)
-                self.set_redis(uid, full)
+                # 其次添加
+                elif full.real_total <= full.total and not full.is_end:
+                    full.real_total += len(blog_ids)
+                    self.set_redis(uid, full)
+
+            elif name == "refresh":
+                if full.real_total <= full.total:
+                    for blog_id in blog_ids:
+                        if blog_id not in full.blog_ids:
+                            full.real_total += 1
+                    self.set_redis(uid, full)
 
     def init_spider_record(self, request, response):
         """
@@ -143,7 +156,7 @@ class CacheFactory(Cache):
 
             # 如果已经全量爬取完毕，则过滤请求
             if full.is_end and full.total == full.last_total:
-                print(f"{uid}已经全量爬取...")
+                self.logger.info(f"{uid}已经全量爬取...")
                 raise IgnoreRequest("URL filtered: {}".format(request.url))
 
     def spider_record(self, completes, item):

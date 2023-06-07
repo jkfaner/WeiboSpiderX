@@ -9,8 +9,10 @@
 @File:blog.py
 @Desc:博客管道
 """
+import logging
 from typing import List, Union, Dict
 
+from WeiboSpiderX.aop import ScrapyLogger
 from WeiboSpiderX.bean.blog import BlogItem
 from WeiboSpiderX.bean.blogType import BlogTypeItem
 from WeiboSpiderX.bean.media import MediaItem
@@ -24,6 +26,7 @@ class BlogPipeline(CacheFactory):
 
     def __init__(self, filter_type, server):
         super(BlogPipeline, self).__init__()
+        self.logger = logging.getLogger(__name__)
         self.filter_type = filter_type
         self.server = server
         self.redis_name = MEDIA_KEY
@@ -140,15 +143,16 @@ class BlogPipeline(CacheFactory):
         :param spider: 爬虫对象
         :return: 管道的数据 or 分离媒体数据中的图片和视频
         """
-        if isinstance(item, dict) and item.get("blog"):
+        if isinstance(item, dict) and (item.get("blog") or item.get("refresh")):
             ext = ExtractorBlog()
-            blogs = ext.extractor_blog(item["blog"])
+            blog_str = item.get("blog") if item.get("blog") else item.get("refresh")
+            blogs = ext.extractor_blog(blog_str)
             # 适配博客类型
             blog_items = self.adapt_blog_type(blogs)
             # 提取媒体
             medias = self.extract_media(blog_items)
             # 添加缓存
-            self.update_cache(medias)
+            self.update_cache(medias, name=spider.name)
             # 分离图片与视频
             return self.separation_media(medias)
 
