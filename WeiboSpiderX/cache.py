@@ -26,7 +26,6 @@ from WeiboSpiderX.utils.tool import set_attr
 
 class Cache:
     server = get_redis_pool()
-    cache = {}  # 全量采集的用户标志
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -37,9 +36,7 @@ class Cache:
         :param uid: 用户标识
         :param value: 缓存项
         """
-        uid = str(uid)
-        self.server.hset(constants.FULL_KEY, uid, value.to_json())
-        self.cache[uid] = value
+        self.server.hset(constants.FULL_KEY, str(uid), value.to_json())
 
     def get_redis(self, uid) -> CacheItem:
         """
@@ -47,11 +44,8 @@ class Cache:
         :param uid: 用户标识
         :return: 缓存项
         """
-        uid = str(uid)
-        value = json.loads(self.server.hget(constants.FULL_KEY, uid))
-        cache_item = set_attr(value, CacheItem())
-        self.cache[uid] = cache_item
-        return cache_item
+        value = json.loads(self.server.hget(constants.FULL_KEY, str(uid)))
+        return set_attr(value, CacheItem())
 
     def check_redis(self, uid) -> bool:
         """
@@ -60,17 +54,6 @@ class Cache:
         :return: 是否存在缓存
         """
         return self.server.hexists(constants.FULL_KEY, str(uid))
-
-    def get_cache(self, uid) -> CacheItem:
-        """
-        获取缓存，先从内存中查找，若不存在则从 Redis 中获取
-        :param uid: 用户标识
-        :return: 缓存项
-        """
-        uid = str(uid)
-        if uid in self.cache:
-            return self.cache[uid]
-        return self.get_redis(uid)
 
 
 class CacheFactory(Cache):
@@ -95,7 +78,7 @@ class CacheFactory(Cache):
         :return:
         """
         for uid, blog_ids in self.filter_blog_id(medias).items():
-            full = self.get_cache(uid)
+            full = self.get_redis(uid)
             # 修改有效值
             full.real_total = len(full.blog_ids)
 
@@ -152,7 +135,7 @@ class CacheFactory(Cache):
         uid = request.meta.get("params", {}).get("uid")
 
         if self.check_redis(uid):
-            full = self.get_cache(uid)
+            full = self.get_redis(uid)
 
             # 如果已经全量爬取完毕，则过滤请求
             if full.is_end and full.total == full.last_total:
@@ -171,7 +154,7 @@ class CacheFactory(Cache):
             blog_id = media.blog_id
             url = media.url
 
-            full = self.get_cache(uid)
+            full = self.get_redis(uid)
             blog_ids = full.blog_ids
 
             # 根据url和是否存在blog_id添加
@@ -179,3 +162,37 @@ class CacheFactory(Cache):
                 blog_ids.append(blog_id)
                 full.last_total += 1  # 计数
                 self.set_redis(uid, full)
+
+
+class CacheHelper(Cache):
+    """开发时使用"""
+
+    def load_redis(self, name, batch_size=50):
+        """
+        加载redis数据
+        :param name:
+        :param batch_size:
+        :return:
+        """
+        batch = []
+        # 游标初始值为0
+        cursor = 0
+        # 遍历哈希表
+        while True:
+            # 使用 HSCAN 命令获取指定哈希表中的键值对
+            cursor, data = self.server.hscan(name, cursor)
+            # 遍历返回的键值对
+            for key in data.keys():
+                media = self.server.hget(name, key)
+                if media:
+                    batch.append(json.loads(media))
+                    if len(batch) >= batch_size:
+                        yield batch
+                        batch = []
+
+            # 如果游标为0，表示遍历结束
+            if cursor == 0:
+                break
+
+        if batch:
+            yield batch

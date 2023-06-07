@@ -9,15 +9,18 @@
 @File:blog.py
 @Desc:博客管道
 """
+import json
 import logging
+import os
 from typing import List, Union, Dict
 
-from WeiboSpiderX.aop import ScrapyLogger
+from scrapy.utils.project import get_project_settings
+
 from WeiboSpiderX.bean.blog import BlogItem
 from WeiboSpiderX.bean.blogType import BlogTypeItem
 from WeiboSpiderX.bean.media import MediaItem
 from WeiboSpiderX.cache import CacheFactory
-from WeiboSpiderX.constants import ORIGINAL, FORWARD, MEDIA_KEY
+from WeiboSpiderX.constants import ORIGINAL, FORWARD, MEDIA_KEY, USER_KEY
 from WeiboSpiderX.extractor.wb_extractor import ExtractorBlog
 from WeiboSpiderX.utils.tool import file_time_formatting, get_file_suffix
 
@@ -32,6 +35,8 @@ class BlogPipeline(CacheFactory):
         self.redis_name = MEDIA_KEY
         self.original = ORIGINAL
         self.forward = FORWARD
+        self.images_store = get_project_settings().get('IMAGES_STORE')
+        self.files_store = get_project_settings().get('FILES_STORE')
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -131,6 +136,32 @@ class BlogPipeline(CacheFactory):
 
         return {'images': images, 'videos': videos}
 
+    def rename_file(self, medias: List[MediaItem]):
+        """
+        修改文件
+        :return:
+        """
+        for media in medias:
+            root = self.images_store if media.is_image else self.files_store
+            new_screen_name = media.filepath.split("/")[0]
+            folder = os.path.join(root, new_screen_name)
+
+            if not os.path.exists(folder):
+
+                self.logger.warning("文件夹不存在: {}".format(media.filepath))
+
+                user = json.loads(self.server.hget(USER_KEY, media.blog.id))
+                old_screen_name = user.get("list")[-1].get("user").get("screen_name")
+
+                if old_screen_name != new_screen_name:
+                    self.logger.info("用户修改了昵称,准备修改文件夹")
+                    old_folder = os.path.join(root, old_screen_name)
+
+                    try:
+                        os.renames(old_folder, folder)
+                    except Exception as e:
+                        self.logger.error(f"Failed to rename {str(e)}")
+
     def process_item(self, item: dict, spider) -> Union[Dict[str, List[MediaItem]], dict]:
         """
         处理响应过来的博客json数据
@@ -151,6 +182,8 @@ class BlogPipeline(CacheFactory):
             blog_items = self.adapt_blog_type(blogs)
             # 提取媒体
             medias = self.extract_media(blog_items)
+            # 修改文件名 避免用户更改昵称
+            self.rename_file(medias)
             # 添加缓存
             self.update_cache(medias, name=spider.name)
             # 分离图片与视频

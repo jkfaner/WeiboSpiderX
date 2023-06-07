@@ -21,7 +21,7 @@ NEWSPIDER_MODULE = "WeiboSpiderX.spiders"  # 新建爬虫模块路径
 
 ROBOTSTXT_OBEY = False  # 是否遵循 robots.txt 规则
 
-CONCURRENT_REQUESTS = 1  # 并发请求的最大数量
+CONCURRENT_REQUESTS = 64  # 并发请求的最大数量
 
 # 下载延迟设置，单位为秒
 # DOWNLOAD_DELAY = 3

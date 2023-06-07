@@ -9,11 +9,13 @@
 @File:user.py
 @Desc:用户管道
 """
+import json
 from typing import Union, List
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.bean.user import UserItem
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
+from WeiboSpiderX.utils.tool import get_time_now
 
 
 class UserPipeline:
@@ -32,6 +34,15 @@ class UserPipeline:
         if isinstance(item, dict) and item.get("user"):
             users = extractor_user(item["user"])
             for user in users:
-                self.server.hset(constants.USER_KEY, user.idstr, user.to_json())
+                if self.server.hexists(constants.USER_KEY, user.idstr):
+                    user_redis = json.loads(self.server.hget(constants.USER_KEY, user.idstr))
+                    old_user = json.loads(user_redis["list"][-1].get("user"))
+                    if old_user.get("screen_name") != user.screen_name:
+                        user_redis["user"] = user.to_json()
+                        user_redis["list"].append({"user": user.to_json(), "time": get_time_now()})
+                        self.server.hset(constants.USER_KEY, user.idstr, json.dumps(user_redis, ensure_ascii=False))
+                else:
+                    info = {"user": user.to_json(), "list": [{"user": user.to_json(), "time": get_time_now()}]}
+                    self.server.hset(constants.USER_KEY, user.idstr, json.dumps(info, ensure_ascii=False))
             return users
         return item

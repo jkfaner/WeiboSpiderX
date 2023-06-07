@@ -10,6 +10,7 @@
 @Desc:视频下载管道
 """
 import logging
+import os
 from urllib.parse import quote
 
 import scrapy
@@ -24,10 +25,12 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
     def __init__(self, *args, **kwargs):
         super(VideoDownloadPipeline, self).__init__(*args, **kwargs)
         self.logger = logging.getLogger(__name__)
-        self.files_store = get_project_settings().get('FILES_STORE')
+        self.setting = get_project_settings()
+        self.files_store = self.setting.get('FILES_STORE')
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # 重写文件路径的生成方法
+        # 修改文件夹
         media = request.meta["media"]
         return media.filepath
 
