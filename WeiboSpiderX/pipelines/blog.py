@@ -148,9 +148,6 @@ class BlogPipeline(CacheFactory):
             folder = os.path.join(root, new_screen_name)
 
             if not os.path.exists(folder):
-
-                self.logger.warning("文件夹不存在: {}".format(folder))
-
                 user = json.loads(self.server.hget(self.redis_user_name, media.blog.id))
                 old_screen_name = user.get("list")[-1].get("user").get("screen_name")
 
