@@ -171,5 +171,5 @@ IMAGES_STORE = FILES_STORE
 DOWNLOAD_FAIL_ON_DATALOSS = False  # 文件过大警告
 
 SPIDER_BLOG_TYPE = "original"  # 爬取规则：original or forward
-SPIDER_UID = ""  # cookie的uid
+SPIDER_UID = "7367188627"  # cookie的uid
 SPIDER_GROUP = "特别关注"  # 根据分组爬取
