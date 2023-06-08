@@ -12,10 +12,10 @@
 import json
 import logging
 from collections import defaultdict
-from typing import List, Dict
 
 from scrapy.exceptions import IgnoreRequest
 from scrapy_redis import get_redis_pool
+from typing import List, Dict
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.bean.cache import CacheItem

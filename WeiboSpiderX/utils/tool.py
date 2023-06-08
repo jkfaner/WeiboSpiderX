@@ -12,8 +12,9 @@
 import datetime
 import json
 import os
-from typing import Union
 from urllib.parse import urlparse, urlencode
+
+from typing import Union
 
 from WeiboSpiderX.bean.base import BaseItem
 from WeiboSpiderX.bean.item import RequestParam, RequestMeta

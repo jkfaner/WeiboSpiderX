@@ -22,6 +22,14 @@ class BaseItem(object):
                 value = value.to_dict()
             elif isinstance(value, bytes):
                 value = value.decode("utf-8")
+            elif isinstance(value, list):
+                _ = []
+                for v in value:
+                    if isinstance(v, BaseItem):
+                        _.append(v.to_dict())
+                    else:
+                        _.append(v)
+                value = _
             cleaned_dict[key] = value
         return cleaned_dict
 

@@ -173,3 +173,8 @@ DOWNLOAD_FAIL_ON_DATALOSS = False  # 文件过大警告
 SPIDER_BLOG_TYPE = "original"  # 爬取规则：original or forward
 SPIDER_UID = "7367188627"  # cookie的uid
 SPIDER_GROUP = "特别关注"  # 根据分组爬取
+
+# ===================mongodb========================
+MONGO_URI = 'mongodb://localhost:27017'
+MONGO_DATABASE = 'weibo'
+

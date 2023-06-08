@@ -5,3 +5,4 @@ Scrapy==2.9.0
 scrapy_redis==0.7.3
 
 Pillow~=9.5.0
+pymongo~=4.3.3
