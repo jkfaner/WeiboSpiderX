@@ -16,11 +16,11 @@ from WeiboSpiderX.bean.base import BaseItem
 class CacheItem(BaseItem):
 
     def __init__(self):
-        self._uid = None
+        self._is_end = False
         self._total = None
         self._last_total = None
         self._real_total = 0
-        self._is_end = False
+        self._uid = None
         self._blog_ids = []
 
     @property

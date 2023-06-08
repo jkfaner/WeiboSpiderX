@@ -57,7 +57,7 @@ def read_json_file(file_path: str) -> Union[dict, list]:
         raise ValueError(f"Invalid JSON file: {e}")
 
 
-def set_attr(source: dict, entity: BaseItem):
+def set_attr(source, entity: BaseItem):
     """
     entity对象赋值
     :param entity:
