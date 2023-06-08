@@ -184,8 +184,6 @@ class BlogPipeline(CacheFactory):
             medias = self.extract_media(blog_items)
             # 修改文件名 避免用户更改昵称
             self.rename_file(medias)
-            # 添加缓存
-            self.update_cache(medias, name=spider.name)
             # 分离图片与视频
             return self.separation_media(medias)
 

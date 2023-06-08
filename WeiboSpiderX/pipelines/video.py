@@ -10,7 +10,6 @@
 @Desc:视频下载管道
 """
 import logging
-import os
 from urllib.parse import quote
 
 import scrapy

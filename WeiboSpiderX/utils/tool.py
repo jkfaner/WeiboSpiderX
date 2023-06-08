@@ -88,14 +88,15 @@ def get_file_suffix(url):
     return suffix
 
 
-def file_time_formatting(created_at):
+def file_time_formatting(created_at,fmt="%Y%m%d"):
     """
     文件时间格式化
+    :param fmt:
     :param created_at: 'Fri Dec 24 03:49:03 +0800 2021'
     :return: 格式化后的时间字符串
     """
     dt_obj = datetime.datetime.strptime(created_at, '%a %b %d %H:%M:%S %z %Y')
-    return dt_obj.strftime("%Y%m%d")
+    return dt_obj.strftime(fmt)
 
 
 def blog_time_formatting(created_at):
@@ -108,5 +109,5 @@ def blog_time_formatting(created_at):
     return dt_obj.astimezone(tz=None).strftime('%Y-%m-%d %H:%M:%S')
 
 
-def get_time_now():
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+def get_time_now(fmt="%Y-%m-%d %H:%M:%S"):
+    return datetime.datetime.now().strftime(fmt)

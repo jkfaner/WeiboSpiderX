@@ -11,7 +11,6 @@
 """
 import json
 import logging
-import sys
 
 from DecryptLogin.modules import weibo
 from requests.utils import dict_from_cookiejar

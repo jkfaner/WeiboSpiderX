@@ -21,7 +21,7 @@ from WeiboSpiderX import constants
 from WeiboSpiderX.bean.cache import CacheItem
 from WeiboSpiderX.bean.media import MediaItem
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
-from WeiboSpiderX.utils.tool import set_attr
+from WeiboSpiderX.utils.tool import set_attr, get_time_now
 
 
 class Cache:
@@ -69,36 +69,6 @@ class CacheFactory(Cache):
         for m in medias:
             b[m.blog.id].add(m.blog_id)
         return dict(b)
-
-    def update_cache(self, medias: List[MediaItem], name):
-        """
-        更新缓存信息
-        :param medias:媒体列表
-        :param name:spider.name
-        :return:
-        """
-        for uid, blog_ids in self.filter_blog_id(medias).items():
-            full = self.get_redis(uid)
-            # 修改有效值
-            full.real_total = len(full.blog_ids)
-
-            if name == "weibo":
-                # 首次添加
-                if full.real_total == 0:
-                    full.real_total += len(blog_ids)
-                    self.set_redis(uid, full)
-
-                # 其次添加
-                elif full.real_total <= full.total and not full.is_end:
-                    full.real_total += len(blog_ids)
-                    self.set_redis(uid, full)
-
-            elif name == "refresh":
-                if full.real_total <= full.total:
-                    for blog_id in blog_ids:
-                        if blog_id not in full.blog_ids:
-                            full.real_total += 1
-                    self.set_redis(uid, full)
 
     def init_spider_record(self, request, response):
         """
@@ -155,12 +125,12 @@ class CacheFactory(Cache):
             url = media.url
 
             full = self.get_redis(uid)
-            blog_ids = full.blog_ids
+            blogs_id = [_.get("blog_id") for _ in full.blog_ids]
 
-            # 根据url和是否存在blog_id添加
-            if any(x.get("url") == url for x in completes) and blog_id not in blog_ids:
-                blog_ids.append(blog_id)
-                full.last_total += 1  # 计数
+            # url必须与存在该博客中
+            if any(x.get("url") == url for x in completes) and blog_id not in blogs_id:
+                full.blog_ids.append({"time": get_time_now(), "blog_id": blog_id})
+                full.real_total += 1  # 计数
                 self.set_redis(uid, full)
 
 

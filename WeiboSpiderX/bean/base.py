@@ -17,12 +17,9 @@ class BaseItem(object):
     def to_dict(self):
         cleaned_dict = {}
         for key, value in self.__dict__.items():
-            if key.startswith('_'):
-                key = key[1:]
+            key = key[1:] if key.startswith('_') else key
             if isinstance(value, BaseItem):
                 value = value.to_dict()
-            elif isinstance(value, list):
-                value = [_.to_dict() for _ in value]
             elif isinstance(value, bytes):
                 value = value.decode("utf-8")
             cleaned_dict[key] = value

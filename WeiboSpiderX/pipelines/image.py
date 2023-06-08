@@ -17,7 +17,6 @@ from scrapy.pipelines.images import ImagesPipeline
 from scrapy.utils.project import get_project_settings
 
 from WeiboSpiderX.cache import CacheFactory
-import os
 
 
 class ImageDownloadPipeline(ImagesPipeline, CacheFactory):
