@@ -4,13 +4,14 @@ from abc import ABC
 import scrapy
 
 from WeiboSpiderX.aop import ScrapyLogger
+from WeiboSpiderX.cache import Cache
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
 from WeiboSpiderX.spiders.refresh import RefreshWeibo
 from WeiboSpiderX.utils.tool import requestQuery
 
 
-class WeiboSpider(RefreshWeibo, ABC):
+class WeiboSpider(RefreshWeibo,Cache, ABC):
     name = "weibo"
 
     def __init__(self, **kwargs):
@@ -100,7 +101,7 @@ class WeiboSpider(RefreshWeibo, ABC):
         finder = JsonDataFinderFactory(response.text)
         if finder.exist_key("list"):
             yield dict(blog=response.text)
-            time.sleep(2)
+            # time.sleep(1)
             # 获取博客
             since_id = finder.get_first_value("since_id")
             query = response.meta["params"]

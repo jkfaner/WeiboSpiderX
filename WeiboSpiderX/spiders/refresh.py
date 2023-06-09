@@ -20,7 +20,7 @@ from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.utils.tool import requestQuery
 
 
-class RefreshWeibo(RedisSpider, Cache, ABC):
+class RefreshWeibo(RedisSpider, ABC):
     name = "refresh"
 
     def __init__(self, **kwargs):
