@@ -21,7 +21,7 @@ NEWSPIDER_MODULE = "WeiboSpiderX.spiders"  # 新建爬虫模块路径
 
 ROBOTSTXT_OBEY = False  # 是否遵循 robots.txt 规则
 
-CONCURRENT_REQUESTS = 64  # 并发请求的最大数量
+CONCURRENT_REQUESTS = 16  # 并发请求的最大数量
 
 # 下载延迟设置，单位为秒
 # DOWNLOAD_DELAY = 3
@@ -133,7 +133,7 @@ FEED_EXPORT_ENCODING = "utf-8"
 LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
 
 # 配置日志级别，默认为 DEBUG
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.ERROR
 
 # 配置日志文件名
 LOG_FILE = f'../logs/scrapy_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
