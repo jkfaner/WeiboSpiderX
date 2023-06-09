@@ -158,7 +158,7 @@ DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 # 设置Redis作为Scrapy-Redis调度器和去重过滤器的存储
 REDIS_URL = 'redis://localhost:6379'
 # 启用分布式爬虫，允许多个爬虫实例共享相同的队列
-SCHEDULER_PERSIST = False
+SCHEDULER_PERSIST = True
 # 可选：设置Redis的其他配置，如密码等
 REDIS_PARAMS = {
     'password': "",
