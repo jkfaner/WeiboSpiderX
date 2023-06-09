@@ -12,9 +12,9 @@
 import json
 import logging
 import os
-from typing import List, Union, Dict
 
 from scrapy.utils.project import get_project_settings
+from typing import List, Union, Dict
 
 from WeiboSpiderX.bean.blog import BlogItem
 from WeiboSpiderX.bean.blogType import BlogTypeItem
@@ -32,7 +32,8 @@ class BlogPipeline(CacheFactory):
         self.logger = logging.getLogger(__name__)
         self.filter_type = filter_type
         self.server = server
-        self.redis_name = MEDIA_KEY
+        self.redis_media_name = MEDIA_KEY
+        self.redis_user_name = USER_KEY
         self.original = ORIGINAL
         self.forward = FORWARD
         self.images_store = get_project_settings().get('IMAGES_STORE')
@@ -131,8 +132,8 @@ class BlogPipeline(CacheFactory):
         videos = [media for media in medias if media.is_video or media.is_live]
 
         for media in medias:
-            if not self.server.hexists(self.redis_name, media.blog_id):
-                self.server.hset(self.redis_name, media.blog_id, media.to_json())
+            if not self.server.hexists(self.redis_media_name, media.blog_id):
+                self.server.hset(self.redis_media_name, media.blog_id, media.to_json())
 
         return {'images': images, 'videos': videos}
 
@@ -147,10 +148,7 @@ class BlogPipeline(CacheFactory):
             folder = os.path.join(root, new_screen_name)
 
             if not os.path.exists(folder):
-
-                self.logger.warning("文件夹不存在: {}".format(media.filepath))
-
-                user = json.loads(self.server.hget(USER_KEY, media.blog.id))
+                user = json.loads(self.server.hget(self.redis_user_name, media.blog.id))
                 old_screen_name = user.get("list")[-1].get("user").get("screen_name")
 
                 if old_screen_name != new_screen_name:

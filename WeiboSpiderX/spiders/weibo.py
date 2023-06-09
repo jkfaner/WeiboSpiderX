@@ -117,3 +117,11 @@ class WeiboSpider(RefreshWeibo, ABC):
                 self.set_redis(uid=uid, value=full)
                 self.logger.info("微博获取结束:{}".format(uid))
                 self.logger.info(full.to_json())
+        else:
+            uid = response.meta["params"]["uid"]
+            # 刷新本地
+            full = self.get_redis(uid)
+            full.is_end = True
+            self.set_redis(uid=uid, value=full)
+            self.logger.info("微博获取结束:{}".format(uid))
+            self.logger.info(full.to_json())
