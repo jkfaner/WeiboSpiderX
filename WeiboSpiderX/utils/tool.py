@@ -12,9 +12,9 @@
 import datetime
 import json
 import os
+from typing import Union
 from urllib.parse import urlparse, urlencode
 
-from typing import Union
 
 from WeiboSpiderX.bean.base import BaseItem
 from WeiboSpiderX.bean.item import RequestParam, RequestMeta
@@ -89,7 +89,7 @@ def get_file_suffix(url):
     return suffix
 
 
-def file_time_formatting(created_at,fmt="%Y%m%d"):
+def file_time_formatting(created_at, fmt="%Y%m%d"):
     """
     文件时间格式化
     :param fmt:

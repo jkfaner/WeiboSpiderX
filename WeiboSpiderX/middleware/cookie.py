@@ -41,7 +41,8 @@ class HandleCookieMiddleware:
         if self.redis.hexists(constants.LOGIN_KEY, self.uid):
             cookie = self.redis.hget(constants.LOGIN_KEY, self.uid)
             return json.loads(cookie)
-        return {}
+        self.login()
+        return self.get_cookies()
 
     def login(self):
         result, session = weibo().login()
