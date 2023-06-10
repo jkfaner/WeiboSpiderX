@@ -11,7 +11,7 @@ from WeiboSpiderX.spiders.refresh import RefreshWeibo
 from WeiboSpiderX.utils.tool import requestQuery
 
 
-class WeiboSpider(RefreshWeibo,Cache, ABC):
+class WeiboSpider(RefreshWeibo, Cache, ABC):
     name = "weibo"
 
     def __init__(self, **kwargs):
@@ -85,7 +85,7 @@ class WeiboSpider(RefreshWeibo,Cache, ABC):
         users = extractor_user(response.text)
         blogs_first_list = []
         for user in users:
-            self.logger.info("首次获取【{}->{}】的博客".format(user.screen_name,user.idstr))
+            self.logger.info("首次获取【{}->{}】的博客".format(user.screen_name, user.idstr))
             params = {"uid": user.idstr, "page": 1, "since_id": "", "feature": 0}
             item = requestQuery(self.user_blog_url, params, self.process_blogs)
             blogs_first_list.append(scrapy.Request(url=item.url, meta=item.meta, callback=item.callback))

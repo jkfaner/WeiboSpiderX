@@ -12,38 +12,40 @@
 import json
 import logging
 import os
-
-from scrapy.utils.project import get_project_settings
 from typing import List, Union, Dict
 
 from WeiboSpiderX.bean.blog import BlogItem
-from WeiboSpiderX.bean.blogType import BlogTypeItem
+from WeiboSpiderX.bean.blog import BlogTypeItem
 from WeiboSpiderX.bean.media import MediaItem
 from WeiboSpiderX.cache import CacheFactory
 from WeiboSpiderX.constants import ORIGINAL, FORWARD, MEDIA_KEY, USER_KEY
 from WeiboSpiderX.extractor.wb_extractor import ExtractorBlog
 from WeiboSpiderX.utils.tool import file_time_formatting, get_file_suffix
 
+logger = logging.getLogger(__name__)
+
 
 class BlogPipeline(CacheFactory):
 
-    def __init__(self, filter_type, server):
+    def __init__(self, server, filter_type, images_store, files_store):
         super(BlogPipeline, self).__init__()
-        self.logger = logging.getLogger(__name__)
-        self.filter_type = filter_type
         self.server = server
+        self.filter_type = filter_type
+        self.images_store = images_store
+        self.files_store = files_store
+
         self.redis_media_name = MEDIA_KEY
         self.redis_user_name = USER_KEY
         self.original = ORIGINAL
         self.forward = FORWARD
-        self.images_store = get_project_settings().get('IMAGES_STORE')
-        self.files_store = get_project_settings().get('FILES_STORE')
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         server = crawler.spider.server
         filter_type = crawler.settings.get("SPIDER_BLOG_TYPE")
-        return cls(filter_type, server)
+        images_store = crawler.settings.get("IMAGES_STORE")
+        files_store = crawler.settings.get("FILES_STORE")
+        return cls(server, filter_type, images_store, files_store)
 
     @staticmethod
     def create_media_item(blog: BlogItem, filename, folder_name, url, is_live, is_image, is_video) -> MediaItem:
@@ -152,13 +154,13 @@ class BlogPipeline(CacheFactory):
                 old_screen_name = user.get("list")[-1].get("user").get("screen_name")
 
                 if old_screen_name != new_screen_name:
-                    self.logger.info("用户修改了昵称,准备修改文件夹")
+                    logger.info("用户修改了昵称,准备修改文件夹")
                     old_folder = os.path.join(root, old_screen_name)
 
                     try:
                         os.renames(old_folder, folder)
                     except Exception as e:
-                        self.logger.error(f"Failed to rename {str(e)}")
+                        logger.error(f"Failed to rename {str(e)}")
 
     def process_item(self, item: dict, spider) -> Union[Dict[str, List[MediaItem]], dict]:
         """

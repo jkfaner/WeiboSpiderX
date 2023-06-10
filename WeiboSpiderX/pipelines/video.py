@@ -14,18 +14,17 @@ from urllib.parse import quote
 
 import scrapy
 from scrapy.pipelines.files import FilesPipeline
-from scrapy.utils.project import get_project_settings
 
 from WeiboSpiderX.cache import CacheFactory
+
+logger = logging.getLogger(__name__)
 
 
 class VideoDownloadPipeline(FilesPipeline, CacheFactory):
 
     def __init__(self, *args, **kwargs):
         super(VideoDownloadPipeline, self).__init__(*args, **kwargs)
-        self.logger = logging.getLogger(__name__)
-        self.setting = get_project_settings()
-        self.files_store = self.setting.get('FILES_STORE')
+        self.files_store = args
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # 重写文件路径的生成方法
@@ -52,7 +51,7 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
         """
         completed_list = [x for ok, x in results if ok]
         for x in completed_list:
-            self.logger.info(f"视频下载成功:{x.get('path')} -> file://{self.files_store}/{quote(x.get('path'))}")
+            logger.info(f"视频下载成功:{x.get('path')} -> file://{self.files_store}/{quote(x.get('path'))}")
         if completed_list:
             self.spider_record(completes=completed_list, item=item["videos"])
         return item

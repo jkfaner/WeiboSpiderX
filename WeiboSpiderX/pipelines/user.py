@@ -11,20 +11,20 @@
 """
 import json
 import logging
-
 from typing import Union, List
 
 from WeiboSpiderX import constants
-from WeiboSpiderX.bean.cache_user import CacheUser, CacheUserItem
+from WeiboSpiderX.bean.cache import CacheUser, CacheUserItem
 from WeiboSpiderX.bean.user import UserItem
 from WeiboSpiderX.extractor.wb_extractor import extractor_user
 from WeiboSpiderX.utils.tool import get_time_now, set_attr
+
+logger = logging.getLogger(__name__)
 
 
 class UserPipeline(object):
 
     def __init__(self, server, settings):
-        self.logger = logging.getLogger(__name__)
         self.server = server
         self.settings = settings
 

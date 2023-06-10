@@ -12,10 +12,10 @@
 import json
 import logging
 from collections import defaultdict
+from typing import List, Dict
 
 from scrapy.exceptions import IgnoreRequest
 from scrapy_redis import get_redis_pool
-from typing import List, Dict
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.bean.cache import CacheItem
@@ -23,12 +23,11 @@ from WeiboSpiderX.bean.media import MediaItem
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.utils.tool import set_attr, get_time_now
 
+logger = logging.getLogger(__name__)
+
 
 class Cache:
     server = get_redis_pool()
-
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
 
     def set_redis(self, uid, value: CacheItem):
         """
@@ -109,7 +108,7 @@ class CacheFactory(Cache):
 
             # 如果已经全量爬取完毕，则过滤请求
             if full.is_end and full.total == full.last_total:
-                self.logger.info(f"{uid}已经全量爬取...")
+                logger.info(f"{uid}已经全量爬取...")
                 raise IgnoreRequest("URL filtered: {}".format(request.url))
 
     def spider_record(self, completes, item):

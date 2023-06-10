@@ -13,21 +13,22 @@ import logging
 
 import pymongo
 
+logger = logging.getLogger(__name__)
+
 
 class MongoDBHandler(object):
 
-    def __init__(self, settings):
-        self.logger = logging.getLogger(__name__)
-
-        mongo_uri = settings.get('MONGO_URI')
-        mongo_db = settings.get('MONGO_DATABASE')
+    def __init__(self, mongo_uri, mongo_db, settings):
         self.client = pymongo.MongoClient(mongo_uri)
         self.db = self.client[mongo_db]
+        self.settings = settings
 
     @classmethod
     def from_crawler(cls, crawler):
         settings = crawler.settings
-        return cls(settings=settings)
+        mongo_uri = settings.get('MONGO_URI')
+        mongo_db = settings.get('MONGO_DATABASE')
+        return cls(mongo_uri=mongo_uri, mongo_db=mongo_db, settings=settings)
 
     def close_connection(self):
         """
