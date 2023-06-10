@@ -24,7 +24,7 @@ class VideoDownloadPipeline(FilesPipeline, CacheFactory):
 
     def __init__(self, *args, **kwargs):
         super(VideoDownloadPipeline, self).__init__(*args, **kwargs)
-        self.files_store = args
+        self.files_store = args[0]
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # 重写文件路径的生成方法

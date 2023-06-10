@@ -24,7 +24,7 @@ class ImageDownloadPipeline(ImagesPipeline, CacheFactory):
 
     def __init__(self, *args, **kwargs):
         super(ImageDownloadPipeline, self).__init__(*args, **kwargs)
-        self.images_store = args
+        self.images_store = args[0]
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # 重写文件路径的生成方法
