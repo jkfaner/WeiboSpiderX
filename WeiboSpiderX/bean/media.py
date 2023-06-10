@@ -99,20 +99,3 @@ class MediaItem(BaseItem):
     @is_video.setter
     def is_video(self, value):
         self._is_video = value
-
-    def to_dict(self):
-        obj_dict = self.__dict__
-        cleaned_dict = {}
-        for key, value in obj_dict.items():
-            if key.startswith('_'):
-                key = key[1:]
-            cleaned_dict[key] = value
-        return cleaned_dict
-
-    def to_json(self):
-        media_dict = self.to_dict()
-        blog = media_dict["blog"]
-        if isinstance(blog.videos, Video):
-            blog.videos = blog.videos.to_dict()
-        media_dict["blog"] = blog.to_dict()
-        return json.dumps(media_dict, ensure_ascii=False)

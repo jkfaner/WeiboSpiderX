@@ -14,17 +14,17 @@ from urllib.parse import quote
 
 import scrapy
 from scrapy.pipelines.images import ImagesPipeline
-from scrapy.utils.project import get_project_settings
 
 from WeiboSpiderX.cache import CacheFactory
+
+logger = logging.getLogger(__name__)
 
 
 class ImageDownloadPipeline(ImagesPipeline, CacheFactory):
 
     def __init__(self, *args, **kwargs):
         super(ImageDownloadPipeline, self).__init__(*args, **kwargs)
-        self.logger = logging.getLogger(__name__)
-        self.images_store = get_project_settings().get('IMAGES_STORE')
+        self.images_store = args
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # 重写文件路径的生成方法
@@ -50,7 +50,7 @@ class ImageDownloadPipeline(ImagesPipeline, CacheFactory):
         """
         completed_list = [x for ok, x in results if ok]
         for x in completed_list:
-            self.logger.info(f"图片下载成功: file://{self.images_store}/{quote(x.get('path'))}")
+            logger.info(f"图片下载成功: file://{self.images_store}/{quote(x.get('path'))}")
         if completed_list:
             self.spider_record(completes=completed_list, item=item["images"])
         return item

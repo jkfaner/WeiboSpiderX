@@ -13,7 +13,7 @@ from typing import List
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.bean.blog import BlogItem
-from WeiboSpiderX.bean.blogType import BlogTypeItem
+from WeiboSpiderX.bean.blog import BlogTypeItem
 from WeiboSpiderX.bean.user import UserItem
 from WeiboSpiderX.bean.video import Video
 from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory

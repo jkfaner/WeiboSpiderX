@@ -15,7 +15,6 @@ import os
 from typing import Union
 from urllib.parse import urlparse, urlencode
 
-
 from WeiboSpiderX.bean.base import BaseItem
 from WeiboSpiderX.bean.item import RequestParam, RequestMeta
 
@@ -89,6 +88,17 @@ def get_file_suffix(url):
     return suffix
 
 
+def time_formatting(created_at, fmt):
+    """
+    博客时间格式化
+    :param fmt:
+    :param created_at: 'Fri Dec 24 03:49:03 +0800 2021'
+    :return:格式化后的时间字符串
+    """
+    dt_obj = datetime.datetime.strptime(created_at, '%a %b %d %H:%M:%S %z %Y')
+    return dt_obj.astimezone(tz=None).strftime(fmt)
+
+
 def file_time_formatting(created_at, fmt="%Y%m%d"):
     """
     文件时间格式化
@@ -96,18 +106,17 @@ def file_time_formatting(created_at, fmt="%Y%m%d"):
     :param created_at: 'Fri Dec 24 03:49:03 +0800 2021'
     :return: 格式化后的时间字符串
     """
-    dt_obj = datetime.datetime.strptime(created_at, '%a %b %d %H:%M:%S %z %Y')
-    return dt_obj.strftime(fmt)
+    return time_formatting(created_at, fmt)
 
 
-def blog_time_formatting(created_at):
+def blog_time_formatting(created_at, fmt='%Y-%m-%d %H:%M:%S'):
     """
     博客时间格式化
+    :param fmt:
     :param created_at: 'Fri Dec 24 03:49:03 +0800 2021'
-    :return:
+    :return:格式化后的时间字符串
     """
-    dt_obj = datetime.datetime.strptime(created_at, '%a %b %d %H:%M:%S %z %Y')
-    return dt_obj.astimezone(tz=None).strftime('%Y-%m-%d %H:%M:%S')
+    return time_formatting(created_at, fmt)
 
 
 def get_time_now(fmt="%Y-%m-%d %H:%M:%S"):
