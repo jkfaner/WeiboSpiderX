@@ -14,8 +14,9 @@ import logging
 from collections import defaultdict
 from typing import List, Dict
 
+import redis
 from scrapy.exceptions import IgnoreRequest
-from scrapy_redis import get_redis_pool
+from scrapy.utils.project import get_project_settings
 
 from WeiboSpiderX import constants
 from WeiboSpiderX.bean.cache import CacheItem
@@ -24,6 +25,17 @@ from WeiboSpiderX.extractor.extractor import JsonDataFinderFactory
 from WeiboSpiderX.utils.tool import set_attr, get_time_now
 
 logger = logging.getLogger(__name__)
+
+
+def get_redis_pool():
+    setting = get_project_settings()
+    url = setting.get("REDIS_URL")
+    host: str = "localhost"
+    port: int = 6379
+    password: str = ""
+    db: int = 0
+    connection_pool = redis.ConnectionPool(host=host, port=port, password=password, db=db, decode_responses=True)
+    return redis.Redis(connection_pool=connection_pool)
 
 
 class Cache:

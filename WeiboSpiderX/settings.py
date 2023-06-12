@@ -166,7 +166,7 @@ REDIS_PARAMS = {
 
 # ===================Download========================
 MEDIA_ALLOW_REDIRECTS = True  # 下载时允许重定向
-FILES_STORE = '/Volumes/photo/weibo'  # 通用文件（包括图片和视频）的保存路径
+FILES_STORE = 'ftp://admin:jkjkjkjk_LaimL.@222.222.222.2/photo/weibo-ftp'  # 通用文件（包括图片和视频）的保存路径
 IMAGES_STORE = FILES_STORE
 DOWNLOAD_FAIL_ON_DATALOSS = False  # 文件过大警告
 
